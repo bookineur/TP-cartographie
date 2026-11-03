@@ -21,6 +21,10 @@ def _load(args):
     if not scans:
         raise SystemExit("Aucun scan trouvé.")
     poses = load_poses(args.poses) if args.poses and Path(args.poses).exists() else {}
+    # scans du MapTool du prof : la position du robot est écrite dans le fichier
+    for s in scans:
+        if s.name not in poses and "robot_pose" in s.meta:
+            poses[s.name] = s.meta["robot_pose"]
     missing = [s.name for s in scans if s.name not in poses]
     if missing and args.poses:
         print(f"(pose absente -> (0,0,0) pour : {', '.join(missing)})")

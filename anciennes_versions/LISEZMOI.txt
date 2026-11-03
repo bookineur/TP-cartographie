@@ -3,3 +3,4 @@ plot_app_version_1.py : Lidar Plot avant l'ajout de l'assemblage a la souris et 
 Pour relancer une ancienne version : copier le fichier a la place de carto\plot_app.py.
 plot_app_version_2.py : Lidar Plot avec deplacement a la souris et intensite, rotation a la molette seulement (1 degre par cran) (03/11/2026).
 theme_version_1.py, assistant_version_1.py : avant la correction de l'echelle 125 % (carte rognee, souris decalee) (03/11/2026).
+plot_app_version_3.py, scan_version_1.py, gridmap_version_1.py, main_version_1.py : avant la compatibilite MapTool du prof (import/export), les cartes dans Lidar Plot et la grid map supercover (03/11/2026).

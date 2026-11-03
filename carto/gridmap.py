@@ -3,8 +3,9 @@
 Démarche :
   1. On discrétise le plan en cellules carrées de `resolution` mètres.
   2. Pour chaque rayon (pose du lidar -> point d'impact) on trace les cellules
-     traversées avec Bresenham : elles sont "libres" (le laser y est passé),
-     la cellule d'arrivée est "occupée".
+     traversées (méthode « supercover », comme le MapTool du prof ; Bresenham
+     reste disponible) : elles sont "libres" (le laser y est passé), la cellule
+     d'arrivée est "occupée".
   3. Chaque cellule stocke un log-odds l = log(p / (1-p)) ; 0 = inconnu (p=0.5).
      Une observation libre ajoute l_free (<0), une occupée ajoute l_occ (>0).
      Additionner des log-odds = appliquer Bayes en supposant les mesures
@@ -38,9 +39,54 @@ def bresenham(x0: int, y0: int, x1: int, y1: int) -> list[tuple[int, int]]:
             y0 += sy
 
 
+def supercover(x0: float, y0: float, x1: float, y1: float, eps: float = 1e-9) -> list[tuple[int, int]]:
+    """Toutes les cellules traversées par le segment (x0,y0)->(x1,y1), coordonnées
+    exprimées EN CELLULES (réelles, non arrondies). Méthode « supercover »
+    (parcours de grille d'Amanatides & Woo), la même que le MapTool du prof :
+    contrairement à Bresenham, aucune cellule touchée n'est sautée, et quand le
+    rayon passe exactement par un coin, les deux cellules voisines sont marquées.
+    La cellule d'arrivée est (floor(x1), floor(y1))."""
+    i, j = int(np.floor(x0)), int(np.floor(y0))
+    i_end, j_end = int(np.floor(x1)), int(np.floor(y1))
+    cells = [(i, j)]
+    dx, dy = x1 - x0, y1 - y0
+    step_i = 1 if dx > 0 else (-1 if dx < 0 else 0)
+    step_j = 1 if dy > 0 else (-1 if dy < 0 else 0)
+    if step_i:
+        t_max_i = ((i + 1 if step_i > 0 else i) - x0) / dx
+        t_delta_i = step_i / dx
+    else:
+        t_max_i = t_delta_i = float("inf")
+    if step_j:
+        t_max_j = ((j + 1 if step_j > 0 else j) - y0) / dy
+        t_delta_j = step_j / dy
+    else:
+        t_max_j = t_delta_j = float("inf")
+    n_max = abs(i_end - i) + abs(j_end - j) + 2  # garde-fou contre les erreurs d'arrondi
+    while (i != i_end or j != j_end) and len(cells) <= 2 * n_max:
+        if t_max_i < t_max_j - eps:
+            i += step_i
+            t_max_i += t_delta_i
+            cells.append((i, j))
+        elif t_max_j < t_max_i - eps:
+            j += step_j
+            t_max_j += t_delta_j
+            cells.append((i, j))
+        else:  # passage exactement par un coin : on marque aussi les deux voisines
+            cells.append((i + step_i, j))
+            cells.append((i, j + step_j))
+            i += step_i
+            j += step_j
+            t_max_i += t_delta_i
+            t_max_j += t_delta_j
+            cells.append((i, j))
+    return cells
+
+
 class OccupancyGrid:
     def __init__(self, resolution=0.05, origin=(0.0, 0.0), shape=(1, 1),
-                 l_occ=0.85, l_free=-0.4, l_min=-4.0, l_max=4.0):
+                 l_occ=0.85, l_free=-0.4, l_min=-4.0, l_max=4.0, raytrace="supercover"):
+        self.raytrace = raytrace  # "supercover" (méthode du prof) ou "bresenham"
         self.res = float(resolution)
         self.origin = np.array(origin, float)  # coin bas-gauche de la cellule [0, 0]
         self.logodds = np.zeros(shape, np.float32)  # indexé [iy, ix]
@@ -107,13 +153,20 @@ class OccupancyGrid:
         if decay:
             self.logodds *= (1.0 - decay)
 
-        sx, sy = self.world_to_cell([pose.x, pose.y])[0]
-        ends = self.world_to_cell(pts)
         free, occ = set(), set()
-        for ex, ey in ends:
-            ray = bresenham(sx, sy, int(ex), int(ey))
-            free.update(ray[:-1])
-            occ.add(ray[-1])
+        if self.raytrace == "bresenham":
+            sx, sy = self.world_to_cell([pose.x, pose.y])[0]
+            for ex, ey in self.world_to_cell(pts):
+                ray = bresenham(sx, sy, int(ex), int(ey))
+                free.update(ray[:-1])
+                occ.add(ray[-1])
+        else:
+            s = (np.array([pose.x, pose.y]) - self.origin) / self.res  # coordonnées en cellules
+            for ex, ey in (pts - self.origin) / self.res:
+                ray = supercover(s[0], s[1], ex, ey)
+                end = (int(np.floor(ex)), int(np.floor(ey)))
+                free.update(ray)
+                occ.add(end)
         # une cellule vue à la fois libre et occupée dans le même scan : l'impact gagne
         # (les rayons rasants traversent souvent la cellule d'un mur voisin)
         free -= occ

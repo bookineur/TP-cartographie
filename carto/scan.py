@@ -17,6 +17,7 @@ scans séparés par des lignes vides (copier-coller du moniteur série).
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -86,31 +87,55 @@ def save_scan_csv(path, angle_deg, distance_mm, intensity, meta=None):
             f.write(f"{float(a):.2f},{int(round(d))},{int(i)}\n")
 
 
+_ROBOT_POSE = re.compile(r"robot position:\s*x\s*=\s*([-+\d.eE]+)\s*m?\s*,\s*y\s*=\s*([-+\d.eE]+)\s*m?\s*,"
+                         r"\s*theta\s*=\s*([-+\d.eE]+)", re.IGNORECASE)
+
+
 def load_scan_file(path) -> list[Scan]:
     """Lit un fichier ; renvoie 1 scan, ou plusieurs si le fichier en contient
-    plusieurs séparés par des lignes vides / des en-têtes répétés."""
+    plusieurs séparés par des lignes vides / des en-têtes répétés.
+
+    Formats reconnus (d'après la ligne d'en-tête) :
+      - le nôtre            angle_deg,distance_mm,intensity
+      - printScanCSV        N,Angle(°),Distance(mm),Intensity,x(mm),y(mm)
+      - MapTool du prof     angle_deg,r_m,x_rel_m,y_rel_m   (distances en MÈTRES, pas
+                            d'intensité), précédé de « # Robot position: x=…m, y=…m,
+                            theta=…deg » : cette pose est rangée dans meta["robot_pose"]."""
     path = Path(path)
-    blocks, cur, meta, cols = [], [], {}, (0, 1, 2)
-    for raw in path.read_text(encoding="utf-8", errors="ignore").splitlines():
+    blocks, cur, meta = [], [], {}
+    cols, unit, has_int = (0, 1, 2), 1000.0, True  # unit : diviseur pour obtenir des mètres
+    for raw in path.read_text(encoding="utf-8-sig", errors="ignore").splitlines():
         line = raw.strip()
         if line.startswith("#"):
+            m = _ROBOT_POSE.search(line)
+            if m:
+                meta["robot_pose"] = Pose.from_list_deg([float(m.group(1)), float(m.group(2)), float(m.group(3))])
+                meta["format"] = "maptool"
+                continue
             for kv in line[1:].split():
                 if "=" in kv:
                     k, v = kv.split("=", 1)
                     meta[k] = v
             continue
         low = line.lower()
-        if not line or low.startswith("angle") or low.startswith("n,"):
-            if low.startswith("n,"):
-                cols = (1, 2, 3)  # format printScanCSV : N,Angle,Distance,Intensity,x,y
+        if not line or low[:1].isalpha():
+            names = [c.strip() for c in low.split(",")]
+            if "r_m" in names:  # MapTool : angle_deg,r_m,x_rel_m,y_rel_m
+                cols, unit, has_int = (names.index("angle_deg") if "angle_deg" in names else 0,
+                                       names.index("r_m"), None), 1.0, False
+                meta["format"] = "maptool"
+            elif low.startswith("n,"):  # printScanCSV : N,Angle,Distance,Intensity,x,y
+                cols, unit, has_int = (1, 2, 3), 1000.0, True
+            elif names[:1] == ["angle_deg"]:
+                cols, unit, has_int = (0, 1, 2), 1000.0, True
             if cur:
                 blocks.append(cur)
                 cur = []
             continue
         parts = line.replace(";", ",").split(",")
         try:
-            cur.append((float(parts[cols[0]]), float(parts[cols[1]]),
-                        float(parts[cols[2]]) if len(parts) > cols[2] else 0.0))
+            inten = float(parts[cols[2]]) if has_int and len(parts) > cols[2] else 0.0
+            cur.append((float(parts[cols[0]]), float(parts[cols[1]]), inten))
         except (ValueError, IndexError):
             continue
     if cur:
@@ -120,8 +145,19 @@ def load_scan_file(path) -> list[Scan]:
     for k, b in enumerate(blocks):
         a = np.array(b)
         name = path.stem if len(blocks) == 1 else f"{path.stem}#{k}"
-        scans.append(Scan(name, np.radians(a[:, 0]), a[:, 1] / 1000.0, a[:, 2], dict(meta)))
+        scans.append(Scan(name, np.radians(a[:, 0]), a[:, 1] / unit, a[:, 2], dict(meta)))
     return scans
+
+
+def save_scan_maptool(path, scan: Scan, pose: Pose):
+    """Écrit un scan au format du MapTool du prof : position du robot, puis
+    angle_deg,r_m,x_rel_m,y_rel_m (repère du lidar, mètres ; r = 0 si pas d'écho)."""
+    c, s = np.cos(scan.angles), np.sin(scan.angles)
+    with Path(path).open("w", encoding="utf-8", newline="\n") as f:
+        f.write(f"# Robot position: x={pose.x:.4f}m, y={pose.y:.4f}m, theta={np.degrees(pose.theta):.2f}deg\n")
+        f.write("angle_deg,r_m,x_rel_m,y_rel_m\n")
+        for a, r, ca, sa in zip(np.degrees(scan.angles), scan.ranges, c, s):
+            f.write(f"{a:.3f},{r:.4f},{r * ca:.4f},{r * sa:.4f}\n")
 
 
 def load_scans(paths) -> list[Scan]:

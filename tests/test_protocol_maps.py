@@ -83,6 +83,32 @@ def test_bresenham():
     assert bresenham(0, 0, -2, -2) == [(0, 0), (-1, -1), (-2, -2)]
 
 
+def test_supercover_matches_maptool_rules():
+    from carto.gridmap import supercover
+    # horizontal : toutes les cellules de 0 à 3
+    assert supercover(0.5, 0.5, 3.5, 0.5) == [(0, 0), (1, 0), (2, 0), (3, 0)]
+    # diagonale exacte par les coins : les deux voisines de chaque coin sont marquées
+    c = supercover(0.5, 0.5, 2.5, 2.5)
+    assert c[0] == (0, 0) and c[-1] == (2, 2)
+    assert {(1, 0), (0, 1), (1, 1), (2, 1), (1, 2)} <= set(c)
+    # Bresenham saute des cellules réellement traversées, pas le supercover
+    c = supercover(0.1, 0.1, 3.9, 1.9)
+    for k in range(len(c) - 1):  # chaque cellule touche la suivante par un côté (ou un coin marqué)
+        assert abs(c[k + 1][0] - c[k][0]) + abs(c[k + 1][1] - c[k][1]) <= 2
+    assert (1, 0) in c and (2, 1) in c and c[-1] == (3, 1)
+
+
+def test_scan_maptool_format_roundtrip(tmp_path):
+    from carto.scan import save_scan_maptool
+    s = Scan("m", np.radians([0, 90, 180]), np.array([1.5, 2.0, 0.0]), np.zeros(3))
+    f = tmp_path / "scan_lidar.csv"
+    save_scan_maptool(f, s, Pose(0.5, 0.75, np.radians(30)))
+    text = f.read_text()
+    assert text.startswith("# Robot position: x=0.5000m, y=0.7500m, theta=30.00deg\nangle_deg,r_m,x_rel_m,y_rel_m")
+    (t,) = load_scan_file(f)
+    assert np.allclose(t.ranges, [1.5, 2.0, 0.0]) and t.meta["robot_pose"].as_list_deg() == [0.5, 0.75, 30.0]
+
+
 def _sim_scan(name, pose):
     ang = np.radians(np.arange(0, 360, 0.8))
     return Scan(name, ang, raycast(pose, ang), np.full(len(ang), 200.0)).filtered()

@@ -41,8 +41,9 @@ from matplotlib.lines import Line2D
 from carto import theme
 from carto.gridmap import build_grid
 from carto.guide import refine_pose
-from carto.scan import Pose, Scan, load_scan_file, save_poses, save_scan_csv
+from carto.scan import Pose, Scan, load_scan_file, save_poses, save_scan_csv, save_scan_maptool
 from carto.theme import D, FONT, SCAN_COLORS
+from carto.vectormap import build_vector_map
 from ld06.sources import SerialSource, SimSource, TextSerialSource, list_serial_ports, probe_port
 
 SIM_LABEL = "Simulation (sans lidar)"
@@ -200,6 +201,21 @@ class LidarPlot:
         ttk.Scale(irow, from_=0, to=255, variable=self.int_thr, length=px(90),
                   command=lambda v: self._intensity_changed()).pack(side="right", padx=px(4))
         tk.Label(irow, text="Intensité min", bg=D["panel"], fg=D["muted"], font=(FONT, 8)).pack(side="right")
+        # cartes calculées à partir des scans visibles (étapes 3 et 5 du TP)
+        mrow = ttk.Frame(side, style="Panel.TFrame")
+        mrow.pack(fill="x", pady=(px(4), 0))
+        self.show_grid = tk.BooleanVar(value=False)
+        self.show_vec = tk.BooleanVar(value=False)
+        ttk.Checkbutton(mrow, text="Grid map", variable=self.show_grid, command=self._maps_toggled).pack(side="left")
+        ttk.Checkbutton(mrow, text="Carte vectorielle", variable=self.show_vec,
+                        command=self._maps_toggled).pack(side="left", padx=px(6))
+        self.cell_var = tk.StringVar(value="0.05")
+        e = ttk.Entry(mrow, textvariable=self.cell_var, width=5)
+        e.pack(side="right")
+        e.bind("<Return>", lambda ev: self._maps_toggled())
+        e.bind("<FocusOut>", lambda ev: self._maps_toggled())
+        tk.Label(mrow, text="pas (m)", bg=D["panel"], fg=D["muted"], font=(FONT, 8)).pack(side="right", padx=px(3))
+        self._map_cache = {}
         self.vars_lbl = tk.Label(side, text="", bg=D["panel"], fg=D["muted"], font=("Consolas", 8),
                                  justify="left", anchor="w", wraplength=px(320))
         self.vars_lbl.pack(fill="x")
@@ -207,7 +223,9 @@ class LidarPlot:
         sess = ttk.Frame(side, style="Panel.TFrame")
         sess.pack(fill="x", pady=(px(12), px(4)))
         tk.Label(sess, text="SESSION", bg=D["panel"], fg=D["muted"], font=(FONT, 8, "bold")).pack(side="left")
-        ttk.Button(sess, text="📂 Ouvrir…", style="Small.TButton", command=self.open_session).pack(side="right")
+        ttk.Button(sess, text="📥 Importer", style="Small.TButton", command=self.import_scans).pack(side="right")
+        ttk.Button(sess, text="📂 Ouvrir…", style="Small.TButton", command=self.open_session).pack(
+            side="right", padx=px(4))
         ttk.Button(sess, text="＋ Nouvelle session", style="Small.TButton", command=self.new_session).pack(
             side="right", padx=px(4))
         self.session_lbl = tk.Label(side, text="", bg=D["panel"], fg=D["text"], font=(FONT, 10, "bold"), anchor="w")
@@ -250,8 +268,10 @@ class LidarPlot:
         ttk.Button(ex, text="🖼 Image", command=self.export_png).grid(row=0, column=0, sticky="we", padx=(0, px(2)))
         ttk.Button(ex, text="▦ Excel", command=self.export_xlsx).grid(row=0, column=1, sticky="we", padx=px(2))
         ttk.Button(ex, text="CSV", command=self.export_csv).grid(row=0, column=2, sticky="we", padx=(px(2), 0))
-        ttk.Button(ex, text="⬇  Tout exporter (image + Excel + résumé)", style="Ok.TButton",
-                   command=self.export_all).grid(row=1, column=0, columnspan=3, sticky="we", pady=(px(5), 0))
+        ttk.Button(ex, text="Formats du prof (grid_map.csv, vector_map.txt, scan_lidar.csv)", style="Small.TButton",
+                   command=self.export_prof).grid(row=1, column=0, columnspan=3, sticky="we", pady=(px(4), 0))
+        ttk.Button(ex, text="⬇  Tout exporter (image + Excel + résumé + formats du prof)", style="Ok.TButton",
+                   command=self.export_all).grid(row=2, column=0, columnspan=3, sticky="we", pady=(px(5), 0))
 
         # ------------------------------------------------------ carte + console
         mframe = tk.Frame(body, bg=D["plot_bg"])
@@ -621,6 +641,40 @@ class LidarPlot:
         n = len(cap["scan"])
         self._msg(f"Scan {k} capturé ({n} points) → {self.folder / (name + '.csv')}", cap["color"])
 
+    def import_scans(self):
+        """Ajoute des scans enregistrés ailleurs : MapTool du prof (scan_lidar.csv, avec la
+        position du robot), nos CSV, ou un copier-coller de printScanCSV."""
+        files = filedialog.askopenfilenames(title="Importer des scans (MapTool, CSV…)",
+                                            filetypes=[("Scans", "*.csv *.txt"), ("Tous les fichiers", "*.*")])
+        if not files:
+            return
+        n_scans = n_pose = 0
+        for f in files:
+            try:
+                scans = load_scan_file(f)
+            except OSError as e:
+                self._msg(f"Lecture impossible : {e}", D["error"])
+                continue
+            for s in scans:
+                if len(s) == 0:
+                    continue
+                k = 1 + max([c["k"] for c in self.captures], default=0)
+                pose = s.meta.get("robot_pose")
+                n_pose += pose is not None
+                cap = {"k": k, "name": f"scan{k}", "color": SCAN_COLORS[(k - 1) % len(SCAN_COLORS)],
+                       "scan": Scan(f"scan{k}", s.angles, s.ranges, s.intensities, {}),
+                       "pose": pose or Pose(), "visible": tk.BooleanVar(value=True),
+                       "time": time.strftime("%H:%M:%S"),
+                       "source": f"import {'MapTool ' if s.meta.get('format') == 'maptool' else ''}{Path(f).name}"}
+                self.captures.append(cap)
+                self._save_capture(cap)
+                n_scans += 1
+        self.selected = len(self.captures) - 1 if n_scans else self.selected
+        self._refresh_list()
+        self._draw_captures(fit=True)
+        self._msg(f"{n_scans} scan(s) importé(s)" + (f", dont {n_pose} avec la position du robot (MapTool)"
+                                                    if n_pose else "") + ".", D["ok"] if n_scans else D["warn"])
+
     def _save_capture(self, cap):
         self.folder.mkdir(parents=True, exist_ok=True)
         s = cap["scan"]
@@ -878,10 +932,76 @@ class LidarPlot:
         (x0, x1), (y0, y1) = self.ax.get_xlim(), self.ax.get_ylim()
         return min(x1 - x0, y1 - y0) / 2
 
+    # ------------------------------------------------- grid map / carte vectorielle
+    def _cell(self) -> float:
+        try:
+            return min(max(float(self.cell_var.get().replace(",", ".")), 0.02), 0.5)
+        except ValueError:
+            return 0.05
+
+    def _maps(self, want_grid, want_vec, allow_compute=True):
+        """Cartes des scans visibles (avec leurs poses), recalculées seulement si
+        les scans, les poses, le pas ou le seuil d'intensité ont changé."""
+        caps = [c for c in self.captures if c["visible"].get()]
+        sig = (tuple((c["name"], round(c["pose"].x, 4), round(c["pose"].y, 4), round(c["pose"].theta, 5))
+                     for c in caps), self._cell(), round(self.int_thr.get()))
+        cache = self._map_cache
+        if not allow_compute or not caps:
+            return (cache.get("grid") if caps else None), (cache.get("vm") if caps else None)
+        pairs = [(self._vis(c["scan"]), c["pose"]) for c in caps]
+        busy = False
+        if want_grid and cache.get("grid_sig") != sig:
+            self.root.configure(cursor="watch"); self.root.update_idletasks(); busy = True
+            cache["grid"], cache["grid_sig"] = build_grid(pairs, self._cell()), sig
+        if want_vec and cache.get("vm_sig") != sig:
+            if not busy:
+                self.root.configure(cursor="watch"); self.root.update_idletasks(); busy = True
+            cache["vm"], cache["vm_sig"] = build_vector_map(pairs), sig
+        if busy:
+            self.root.configure(cursor="")
+            parts = []
+            if want_grid and cache.get("grid") is not None:
+                g = cache["grid"]
+                parts.append(f"grid map {g.shape[1]}×{g.shape[0]} cellules de {g.res * 100:.0f} cm")
+            if want_vec and cache.get("vm") is not None:
+                parts.append(f"carte vectorielle {len(cache['vm'].segments)} segments")
+            self._msg(f"Calculé à partir de {len(caps)} scan(s) : " + ", ".join(parts), D["accent"])
+        return cache.get("grid") if want_grid else None, cache.get("vm") if want_vec else None
+
+    def _maps_toggled(self):
+        self._draw_captures()
+
+    def _draw_maps(self):
+        """Grid map sous les points (libre = bleu sombre, occupé = blanc, inconnu = transparent),
+        carte vectorielle par-dessus (segments rouges, comme le MapTool)."""
+        if not (self.show_grid.get() or self.show_vec.get()):
+            return []
+        moving = bool(getattr(self, "_drag", None) or getattr(self, "_rot", None))
+        grid, vm = self._maps(self.show_grid.get(), self.show_vec.get(), allow_compute=not moving)
+        arts, handles = [], []
+        if grid is not None:
+            p = grid.probability()
+            img = np.zeros(p.shape + (4,))
+            free, occ = grid.logodds < 0, p >= 0.65
+            img[free] = (0.12, 0.23, 0.37, 0.55)
+            img[occ] = (0.93, 0.95, 0.98, 0.9)
+            arts.append(self.ax.imshow(img, origin="lower", extent=grid.extent, interpolation="nearest",
+                                       zorder=0.5))
+            handles.append(Line2D([], [], marker="s", ls="", ms=8, color="#EEF2F7", label="Grid map : occupé"))
+        if vm is not None:
+            for sg in vm.segments:
+                arts += self.ax.plot([sg.p1[0], sg.p2[0]], [sg.p1[1], sg.p2[1]], color="#EF4444",
+                                     lw=1.6 + min(sg.n_obs, 4) * 0.4, solid_capstyle="round", zorder=8)
+            handles.append(Line2D([], [], color="#EF4444", lw=2.5, label=f"Segments ({len(vm.segments)})"))
+        self._map_handles = handles
+        return arts
+
     def _draw_captures(self, fit=False):
         for a in self.cap_arts:
             a.remove()
         self.cap_arts = []
+        self._map_handles = []
+        self.cap_arts += self._draw_maps()
         handles = []
         self._pick_caps = []
         for i, c in enumerate(self.captures):
@@ -904,6 +1024,7 @@ class LidarPlot:
             self.legend = None
         handles.insert(0, Line2D([], [], marker="o", ls="", ms=7, color=D["live"],
                                  label="Direct" + (" (pause)" if self.paused else "")))
+        handles += self._map_handles
         self.legend = self.ax.legend(handles=handles, loc="upper left", fontsize=8, facecolor=D["panel"],
                                      edgecolor=D["border"], labelcolor=D["text"], framealpha=0.9)
         self.cbar_ax.set_visible(self.color_by_int.get())
@@ -1284,6 +1405,54 @@ class LidarPlot:
                     except (AttributeError, OSError):
                         pass
 
+    def _write_prof_formats(self, folder: Path, caps) -> list[str]:
+        """Exports aux formats du MapTool du prof :
+          grid_map.csv    0/1 (1 = occupé), une ligne par rangée, du haut (y max) vers le bas
+          vector_map.txt  une ligne x1,y1,x2,y2 (m) par segment
+          scan_lidar_<scan>.csv  position du robot puis angle_deg,r_m,x_rel_m,y_rel_m"""
+        folder.mkdir(parents=True, exist_ok=True)
+        pairs = [(self._vis(c["scan"]), c["pose"]) for c in caps]
+        grid = build_grid(pairs, self._cell())
+        occ = grid.classify() == 1
+        ny, nx = occ.shape
+        lines = [f"# Grid map {nx}x{ny}, cell={grid.res:g} m ; 1=occupied,0=free",
+                 f"# origin=({grid.origin[0]:.4f},{grid.origin[1]:.4f}) m : coin bas-gauche de la cellule (0,0) ; "
+                 f"lignes du haut (y max) vers le bas"]
+        lines += [",".join("1" if v else "0" for v in occ[j]) for j in range(ny - 1, -1, -1)]
+        (folder / "grid_map.csv").write_text("\n".join(lines) + "\n", encoding="utf-8")
+        vm = build_vector_map(pairs)
+        (folder / "vector_map.txt").write_text(
+            "# Vector map segments: x1,y1,x2,y2 (meters)\n"
+            + "".join(f"{s.p1[0]:.4f},{s.p1[1]:.4f},{s.p2[0]:.4f},{s.p2[1]:.4f}\n" for s in vm.segments),
+            encoding="utf-8")
+        files = ["grid_map.csv", "vector_map.txt"]
+        for c in caps:
+            name = f"scan_lidar_{c['name'] if c['k'] else 'direct'}.csv"
+            save_scan_maptool(folder / name, c["scan"], c["pose"])
+            files.append(name)
+        return files
+
+    def export_prof(self):
+        caps = self._export_targets()
+        if not caps:
+            return self._msg("Rien à exporter.", D["warn"])
+        folder = self.folder / "formats_prof"
+        self.root.configure(cursor="watch"); self.root.update_idletasks()
+        try:
+            files = self._write_prof_formats(folder, caps)
+        finally:
+            self.root.configure(cursor="")
+        self._msg(f"Formats du prof écrits dans {folder} : grid_map.csv, vector_map.txt et "
+                  f"{len(files) - 2} scan_lidar_*.csv", D["ok"])
+        if messagebox.askyesno("Formats du prof", f"Fichiers écrits dans :\n{folder.resolve()}\n\n"
+                                                  "• grid_map.csv (0/1)\n• vector_map.txt (x1,y1,x2,y2)\n"
+                                                  f"• {len(files) - 2} fichier(s) scan_lidar_*.csv\n\n"
+                                                  "Ouvrir le dossier ?"):
+            try:
+                os.startfile(folder.resolve())
+            except (AttributeError, OSError):
+                pass
+
     def export_all(self):
         caps = self._export_targets()
         if not caps:
@@ -1294,8 +1463,10 @@ class LidarPlot:
         n = self._write_csv(self.folder / "points_scans.csv")
         nx = self._xlsx_or_explain(self.folder / "scans_lidar.xlsx")
         (self.folder / "resume.md").write_text(self._summary_md(caps, n), encoding="utf-8")
+        prof = self._write_prof_formats(self.folder / "formats_prof", caps)
         files = (f"carte_scans.png, images_par_scan/ ({len(each)} images), "
-                 + ("scans_lidar.xlsx, " if nx is not None else "") + "points_scans.csv, resume.md")
+                 + ("scans_lidar.xlsx, " if nx is not None else "") + "points_scans.csv, resume.md, "
+                 f"formats_prof/ ({len(prof)} fichiers)")
         self._msg(f"Exporté dans {self.folder} : {files} ({n} points)", D["ok"])
         if messagebox.askyesno("Export terminé", f"{files}\nenregistrés dans :\n"
                                                 f"{self.folder.resolve()}\n\nOuvrir le dossier ?"):

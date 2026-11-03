@@ -64,7 +64,22 @@ python -m carto plot
    - les statistiques indiquent la médiane, le minimum et le maximum, et la part des points sous le seuil.
 
    ⚠ Le format Teleplot ne transmet **pas** l'intensité. Pour la mesurer, il faut téléverser `arduino/ESP32_LD06_CSV_intensite`, qui envoie les scans en CSV à 921 600 bauds.
-8. **Statistiques en direct** : points, part de points valides, fréquence des tours, distances min et max, format reçu. On y trouve aussi les variables Teleplot (`>nom:valeur`) et une **console série** (bouton en bas à gauche).
+8. **Grid map et carte vectorielle dans la fenêtre** : les cases **« Grid map »** et **« Carte vectorielle »** calculent les deux cartes à partir des scans visibles et de leurs positions, avec un pas de grille réglable (5 cm par défaut).
+   - Grid map : libre en bleu sombre, occupé en blanc, inconnu transparent.
+   - Carte vectorielle : segments en rouge.
+
+   Le calcul est refait seulement quand un scan, une position, le pas ou le seuil d'intensité change.
+9. **Compatibilité avec le MapTool du prof** (`MapTool.html`, `maptool.py`, `maptoolProcessing.pde`) :
+   - **« 📥 Importer »** lit ses `scan_lidar.csv` (`# Robot position: x=…m, y=…m, theta=…deg`, puis `angle_deg,r_m,x_rel_m,y_rel_m`, distances en mètres). Chaque scan est placé directement à la position du robot indiquée dans le fichier. Nos CSV et les copier-coller de `printScanCSV` sont aussi acceptés.
+   - **« Formats du prof »** (et « Tout exporter ») écrit dans `formats_prof/` :
+     - `grid_map.csv` : 0/1, du haut vers le bas, avec l'origine de la grille en commentaire ;
+     - `vector_map.txt` : une ligne `x1,y1,x2,y2` par segment ;
+     - un `scan_lidar_<scan>.csv` par scan.
+   - Les commandes `python -m carto view|grid|vector` utilisent aussi la position écrite dans ces fichiers.
+   - La grid map est remplie avec la méthode **supercover** du MapTool (parcours de grille d'Amanatides & Woo). Elle marque toutes les cellules réellement traversées par un rayon, y compris les deux voisines quand il passe par un coin. Bresenham reste disponible (`OccupancyGrid(raytrace="bresenham")`).
+
+   Vérifié avec des scans au format MapTool d'une salle connue : les segments exportés sont à 1 mm des vrais murs (médiane), 8 mm au pire.
+10. **Statistiques en direct** : points, part de points valides, fréquence des tours, distances min et max, format reçu. On y trouve aussi les variables Teleplot (`>nom:valeur`) et une **console série** (bouton en bas à gauche).
 
 Dans la liste des ports, « Simulation (sans lidar) » permet de s'entraîner, avec le bouton « Déplacer le lidar virtuel ».
 
