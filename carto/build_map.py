@@ -90,7 +90,7 @@ def next_version_dir(base: Path) -> Path:
 
 
 def build(session: Path, selection: str | None = None, out: Path | None = None, use_saved_poses=False,
-          res=0.05, log=print, excluded: str | None = None, align_walls=True) -> dict:
+          res=0.05, log=print, excluded: str | None = None, align_walls=True, max_range=10.0) -> dict:
     """`excluded` : scans volontairement écartés de la carte (ex. « 10-14 ») mais
     présentés dans le rapport (figure et explication).
     Sans `out`, chaque exécution écrit dans un NOUVEAU dossier <session>/carte/version_N :
@@ -110,7 +110,7 @@ def build(session: Path, selection: str | None = None, out: Path | None = None, 
     # 1-2. lecture + prétraitement
     raw = [load_scan_file(files[k])[0] for k in ks]
     has_intensity = any(np.any(s.intensities > 0) for s in raw)
-    clean = [clean_scan(s, min_intensity=50 if has_intensity else None) for s in raw]
+    clean = [clean_scan(s, max_range=max_range, min_intensity=50 if has_intensity else None) for s in raw]
     log(f"{len(ks)} scans, {sum(map(len, raw))} points -> {sum(map(len, clean))} après prétraitement")
 
     # 3. positions : mesurées (poses.json) ou retrouvées par recalage global
