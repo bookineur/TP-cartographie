@@ -11,6 +11,9 @@
       - liste des scans : visibilité, suppression, position du lidar (x, y, θ)
         pour superposer des scans pris à des endroits différents, recalage auto ;
       - exports : image PNG, tableau CSV de tous les points, dossier complet ;
+      - « ◎ Localiser (TP 2) » : localise le scan sélectionné sur la grid map, la
+        carte vectorielle ou le scan voisin, compare les méthodes à la pose
+        saisie (mesurée) et lance l'évaluation complète (carto/localise_dialog.py) ;
       - variables Teleplot (>nom:valeur) et console série.
   Chaque capture est aussitôt sauvée dans le dossier de session (format du
   projet : scanK.csv + poses.json), réutilisable par les étapes 2 à 5 du TP.
@@ -50,6 +53,7 @@ SIM_LABEL = "Simulation (sans lidar)"
 INT_CMAP = "plasma"  # intensité 0 (violet foncé) → 255 (jaune)
 BAUDS = ["Auto", "115200", "230400", "921600", "460800", "57600"]
 FORMATS = {"Texte : Teleplot / CSV": "texte", "LD06 direct (binaire)": "raw"}
+FMT_NAMES = {"maptool": "MapTool ", "robotcontrol": "RobotControl "}
 
 
 def scan_from_dict(d, name="direct") -> Scan:
@@ -76,6 +80,8 @@ class LidarPlot:
         self._last_slow = 0.0
         self._fitted = False
         self._sim_index = 0
+        self.loc_overlay = []      # [(légende, scan, pose, couleur)] : fenêtre « Localiser »
+        self.loc_dialog = None
         root.title("Lidar Plot — LD06")
         w, h = root.winfo_screenwidth(), root.winfo_screenheight()
         root.geometry(f"{min(int(1400 * self.scale), w - 40)}x{min(int(860 * self.scale), h - 80)}+10+10")
@@ -343,6 +349,8 @@ class LidarPlot:
         b.grid(row=6, column=0, columnspan=7, sticky="we", pady=(px(4), 0))
         ttk.Button(b, text="⤧ Recaler sur les autres scans", command=self.refine_selected).pack(side="left")
         ttk.Button(b, text="✕ Supprimer", command=self.delete_selected).pack(side="right")
+        ttk.Button(f, text="◎ Localiser ce scan (TP 2 : méthodes, écart à la pose mesurée)…", style="Accent.TButton",
+                   command=self.open_localise).grid(row=7, column=0, columnspan=7, sticky="we", pady=(px(5), 0))
         self.pose_frame.pack_forget()
 
     # ------------------------------------------------------------ intensité
@@ -642,13 +650,17 @@ class LidarPlot:
         self._msg(f"Scan {k} capturé ({n} points) → {self.folder / (name + '.csv')}", cap["color"])
 
     def import_scans(self):
-        """Ajoute des scans enregistrés ailleurs : MapTool du prof (scan_lidar.csv, avec la
+        """Ajoute des scans enregistrés ailleurs : MapTool ou RobotControl du prof (avec la
         position du robot), nos CSV, ou un copier-coller de printScanCSV."""
-        files = filedialog.askopenfilenames(title="Importer des scans (MapTool, CSV…)",
+        files = filedialog.askopenfilenames(title="Importer des scans (MapTool, RobotControl, CSV…)",
                                             filetypes=[("Scans", "*.csv *.txt"), ("Tous les fichiers", "*.*")])
         if not files:
             return
+        # ordre d'enregistrement (RobotControl nomme tous ses fichiers lidar_scan.csv : le nom ne suffit pas)
+        files = sorted(files, key=lambda f: os.path.getmtime(f))
         n_scans = n_pose = 0
+        stale = []
+        prev_pose = None
         for f in files:
             try:
                 scans = load_scan_file(f)
@@ -661,19 +673,28 @@ class LidarPlot:
                 k = 1 + max([c["k"] for c in self.captures], default=0)
                 pose = s.meta.get("robot_pose")
                 n_pose += pose is not None
+                if pose is not None and prev_pose is not None and pose.as_list_deg() == prev_pose.as_list_deg():
+                    stale.append(Path(f).name)  # même pose que le scan précédent : « Envoyer Pose » oublié ?
+                prev_pose = pose
                 cap = {"k": k, "name": f"scan{k}", "color": SCAN_COLORS[(k - 1) % len(SCAN_COLORS)],
                        "scan": Scan(f"scan{k}", s.angles, s.ranges, s.intensities, {}),
                        "pose": pose or Pose(), "visible": tk.BooleanVar(value=True),
                        "time": time.strftime("%H:%M:%S"),
-                       "source": f"import {'MapTool ' if s.meta.get('format') == 'maptool' else ''}{Path(f).name}"}
+                       "source": f"import {FMT_NAMES.get(s.meta.get('format'), '')}{Path(f).name}"}
                 self.captures.append(cap)
                 self._save_capture(cap)
                 n_scans += 1
         self.selected = len(self.captures) - 1 if n_scans else self.selected
         self._refresh_list()
         self._draw_captures(fit=True)
-        self._msg(f"{n_scans} scan(s) importé(s)" + (f", dont {n_pose} avec la position du robot (MapTool)"
-                                                    if n_pose else "") + ".", D["ok"] if n_scans else D["warn"])
+        self._msg(f"{n_scans} scan(s) importé(s) dans l'ordre d'enregistrement" +
+                  (f", dont {n_pose} avec la position du robot (MapTool / RobotControl)" if n_pose else "") + ".",
+                  D["ok"] if n_scans else D["warn"])
+        if stale:
+            messagebox.showwarning("Poses identiques", f"{len(stale)} scan(s) ont exactement la même pose que le scan "
+                                   "précédent :\n" + "\n".join(stale[:8]) + "\n\nDans RobotControl, la pose n'est "
+                                   "mise à jour que par le bouton « Envoyer Pose ». C'est normal pour des captures répétées "
+                                   "au même repère ; si le robot avait bougé, corrigez ces poses dans l'éditeur de position.")
 
     def _save_capture(self, cap):
         self.folder.mkdir(parents=True, exist_ok=True)
@@ -864,6 +885,17 @@ class LidarPlot:
         self._draw_captures()
         self._msg(f"Scan {c['k']} recalé : recouvrement {before:.0%} → {after:.0%}.", D["ok"])
 
+    def open_localise(self):
+        from carto.localise_dialog import LocaliseDialog
+        if self.selected is None:
+            return self._msg("Sélectionnez d'abord un scan dans la liste.", D["warn"])
+        if self.loc_dialog is not None and self.loc_dialog.win.winfo_exists():
+            self.loc_dialog.k = self.selected
+            self.loc_dialog._refresh_title()
+            self.loc_dialog.win.lift()
+            return
+        self.loc_dialog = LocaliseDialog(self)
+
     def delete_selected(self):
         if self.selected is None:
             return
@@ -1019,6 +1051,14 @@ class LidarPlot:
             self.cap_arts += self.ax.plot(p.x, p.y, "o", ms=6, color=c["color"], mec="white", mew=1, zorder=7)
             handles.append(Line2D([], [], marker="o", ls="", ms=7, color=c["color"],
                                   label=f"Scan {c['k']} · {len(c['scan'])} pts"))
+        for label, scan, pose, color in self.loc_overlay:  # fenêtre « Localiser » : départ / pose trouvée
+            pts = self._vis(scan).world_xy(pose)
+            self.cap_arts.append(self.ax.scatter(pts[:, 0], pts[:, 1], s=9, marker="x", color=color, lw=0.9,
+                                                 zorder=9))
+            self.cap_arts += self.ax.plot([pose.x, pose.x + 0.4 * np.cos(pose.theta)],
+                                          [pose.y, pose.y + 0.4 * np.sin(pose.theta)], color=color, lw=2,
+                                          ls="--", zorder=9)
+            handles.append(Line2D([], [], marker="x", ls="", ms=7, color=color, label=label))
         if self.legend:
             self.legend.remove()
             self.legend = None

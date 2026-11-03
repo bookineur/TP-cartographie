@@ -7,6 +7,7 @@
     python -m carto grid   data/sim --poses data/sim/poses_truth.json --out out/grid
     python -m carto vector data/sim --poses data/sim/poses_truth.json --out out/vector [--cut-rays]
     python -m carto evaluer [--reel data/salle_2026-11-02_18h31] [--rapide]
+    python -m carto evaluer --reel data/salle_jour2 --mesurees --incertitude 0.02 2 --sans-simulation
     python -m carto localiser scan.csv --ref gridmap.npz|carte_vectorielle.txt|scan_ref.csv --init x y theta
 """
 from __future__ import annotations
@@ -54,6 +55,12 @@ def cmd_assistant(args):
 
 
 def cmd_simulate(args):
+    if args.tp2:
+        from carto.simulate import simulate_tp2_session
+        out = simulate_tp2_session(args.out if args.out != "data/sim" else "data/repetition_tp2", seed=args.seed)
+        print(f"Séance TP 2 simulée dans {out}/ : scanK.csv + poses.json (positions « mesurées »), "
+              "verite.json (vraies poses), robotcontrol/ (mêmes scans au format RobotControl)")
+        return
     from carto.simulate import simulate
     out = simulate(args.out, args.per_pose, args.seed)
     print(f"Scans simulés dans {out}/ (+ poses_truth.json, poses_init.json)")
@@ -142,50 +149,45 @@ def cmd_vector(args):
 
 def cmd_evaluer(args):
     from carto.evaluation import evaluate
-    evaluate(args.out, args.reel, args.poses, args.rapide)
-
-
-def load_reference(path, ref_pose=None):
-    """grid map (.npz), carte vectorielle (.txt / .csv x1,y1,x2,y2) ou scan de référence (.csv)."""
-    from carto import localisation as L
-    from carto.gridmap import OccupancyGrid
-    from carto.scan import Pose, load_scan_file
-    from carto.segments import Segment
-    path = Path(path)
-    if path.suffix == ".npz":
-        return L.GridRef(OccupancyGrid.load(path))
-    head = path.read_text(encoding="utf-8-sig", errors="replace").splitlines()
-    rows = [l for l in head if l.strip() and not l.startswith("#")]
-    if rows and rows[0].replace(" ", "").lower().startswith("x1,y1,x2,y2") or path.suffix == ".txt":
-        segs = []
-        for l in rows:
-            try:
-                x1, y1, x2, y2 = map(float, l.split(",")[:4])
-            except ValueError:
-                continue  # en-tête
-            segs.append(Segment((x1, y1), (x2, y2)))
-        return L.VectorRef(segs)
-    (s,) = load_scan_file(path)[:1]
-    pose = ref_pose or s.meta.get("robot_pose") or Pose()
-    return L.CloudRef(s.filtered().world_xy(pose), point_to_line=True)
+    if args.mesurees and not args.reel:
+        raise SystemExit("--mesurees demande --reel <session>.")
+    evaluate(args.out, args.reel, "mesurees" if args.mesurees else args.poses, args.rapide, scans=args.scans,
+             seuils=args.seuils, incertitude=args.incertitude, sans_simulation=args.sans_simulation)
 
 
 def cmd_localiser(args):
     from carto import localisation as L
     from carto.register import clean_scan
     from carto.scan import Pose, load_scan_file
-    ref = load_reference(args.ref)
+    ref = L.load_reference(args.ref, Pose.from_list_deg(args.ref_pose) if args.ref_pose else None)
     scan = clean_scan(load_scan_file(args.scan)[0])
     init = Pose.from_list_deg(args.init) if args.init else scan.meta.get("robot_pose", Pose())
     print(f"Référence : {ref.kind} ; pose initiale {init.as_list_deg()}")
+    if getattr(ref, "pose_source", None) == "origine":
+        print("  ATTENTION : la pose du scan de référence est inconnue (ni dans le fichier, ni dans poses.json) : "
+              "il est placé en (0, 0, 0). Donnez-la avec --ref-pose X Y THETA.")
+    elif getattr(ref, "pose_source", None):
+        print(f"  pose du scan de référence ({ref.pose_source}) : {ref.pose.as_list_deg()}")
     names = L.methods_for(ref) if args.methode == "toutes" else [args.methode]
     for m in names:
         r = L.localise(ref, scan.local_xy(), init, m)
         print(f"  {m:18s} -> x={r.pose.x:.3f} m  y={r.pose.y:.3f} m  θ={np.degrees(r.pose.theta):.2f}°   "
-              f"score {r.score:.2f}   {r.time_s * 1000:.0f} ms")
+              f"score {r.score:.2f}   {r.time_s * 1000:.0f} ms" + ("   <- score bas : résultat douteux" if r.score < 0.3 else ""))
+    print("Score = part des points du scan posés sur la référence (0 à 1) ; une bonne localisation dépasse ~0,6.")
+
+
+def _utf8_stdout():
+    """« θ », « ° »… : sans ça, rediriger la sortie (> fichier.txt) plante sous Windows (cp1252)."""
+    import sys
+    for s in (sys.stdout, sys.stderr):
+        try:
+            s.reconfigure(encoding="utf-8")
+        except (AttributeError, ValueError):
+            pass
 
 
 def main(argv=None):
+    _utf8_stdout()
     ap = argparse.ArgumentParser(prog="python -m carto", description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -214,12 +216,20 @@ def main(argv=None):
     p.add_argument("--out", default="data/sim")
     p.add_argument("--per-pose", type=int, default=1)
     p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--tp2", action="store_true", help="répétition de la séance de vrais tests du TP 2 (repères, poses mesurées)")
     p.set_defaults(func=cmd_simulate)
 
     p = sub.add_parser("evaluer", help="TP Jour 2 : compare les méthodes de localisation (chiffré)")
     p.add_argument("--reel", help="session réelle à évaluer aussi, ex. data/salle_2026-11-02_18h31")
     p.add_argument("--poses", help="poses de référence du réel (défaut : dernière carte/version_N/poses_assemblees.json)")
     p.add_argument("--out", default="resultats/localisation", help="dossier (une version_N par lancement)")
+    p.add_argument("--mesurees", action="store_true",
+                   help="référence = poses MESURÉES de la session (poses.json saisi dans Lidar Plot / RobotControl)")
+    p.add_argument("--scans", help="scans du réel à utiliser, ex. 1-9,12 (défaut : tous ceux qui ont une pose)")
+    p.add_argument("--incertitude", nargs=2, type=float, metavar=("M", "DEG"),
+                   help="incertitude de vos mesures de pose, ex. 0.02 2 (recopiée dans le rapport)")
+    p.add_argument("--seuils", nargs=2, type=float, metavar=("M", "DEG"), help="seuils de réussite (défaut 0.05 2)")
+    p.add_argument("--sans-simulation", action="store_true", help="évaluer seulement le réel (plus rapide)")
     p.add_argument("--rapide", action="store_true", help="moins de cas, pour essayer")
     p.set_defaults(func=cmd_evaluer)
 
@@ -227,6 +237,8 @@ def main(argv=None):
     p.add_argument("scan", help="scan à localiser (CSV)")
     p.add_argument("--ref", required=True, help="gridmap.npz, carte_vectorielle.txt / vector_map.txt, ou scan de référence .csv")
     p.add_argument("--init", nargs=3, type=float, metavar=("X", "Y", "THETA_DEG"), help="pose initiale")
+    p.add_argument("--ref-pose", nargs=3, type=float, metavar=("X", "Y", "THETA_DEG"),
+                   help="pose du scan de référence (sinon : celle écrite dans le fichier, ou dans poses.json à côté)")
     p.add_argument("--methode", default="toutes", help="brute force, multi-résolution, Gauss-Newton, ICP, particules… ou toutes")
     p.set_defaults(func=cmd_localiser)
 

@@ -100,7 +100,10 @@ def load_scan_file(path) -> list[Scan]:
       - printScanCSV        N,Angle(°),Distance(mm),Intensity,x(mm),y(mm)
       - MapTool du prof     angle_deg,r_m,x_rel_m,y_rel_m   (distances en MÈTRES, pas
                             d'intensité), précédé de « # Robot position: x=…m, y=…m,
-                            theta=…deg » : cette pose est rangée dans meta["robot_pose"]."""
+                            theta=…deg » : cette pose est rangée dans meta["robot_pose"] ;
+      - RobotControl du prof  angle_deg,distance_m,intensity (MÈTRES), même ligne
+                            « # Robot position » (pose saisie dans RobotControl).
+    Une colonne dont le nom finit par _m est lue en mètres, _mm en millimètres."""
     path = Path(path)
     blocks, cur, meta = [], [], {}
     cols, unit, has_int = (0, 1, 2), 1000.0, True  # unit : diviseur pour obtenir des mètres
@@ -126,6 +129,11 @@ def load_scan_file(path) -> list[Scan]:
                 meta["format"] = "maptool"
             elif low.startswith("n,"):  # printScanCSV : N,Angle,Distance,Intensity,x,y
                 cols, unit, has_int = (1, 2, 3), 1000.0, True
+            elif "distance_m" in names:  # RobotControl : angle_deg,distance_m,intensity
+                cols = (names.index("angle_deg") if "angle_deg" in names else 0, names.index("distance_m"),
+                        names.index("intensity") if "intensity" in names else None)
+                unit, has_int = 1.0, cols[2] is not None
+                meta["format"] = "robotcontrol"
             elif names[:1] == ["angle_deg"]:
                 cols, unit, has_int = (0, 1, 2), 1000.0, True
             if cur:

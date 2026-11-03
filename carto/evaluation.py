@@ -41,6 +41,13 @@ SUCCESS_XY, SUCCESS_TH = 0.05, 2.0
 # angle (°) de signe au hasard. Même tirage pour toutes les méthodes.
 INIT_LEVELS = [(0.05, 2.0), (0.10, 5.0), (0.20, 8.0), (0.35, 12.0), (0.50, 20.0)]
 STANDARD_LEVEL = 2  # (0,20 m ; 8°) : erreur typique d'une pose estimée à l'œil / odométrie
+# Convergence : la méthode, partie d'une pose fausse, retombe-t-elle sur la pose
+# qu'ELLE trouve en partant de la pose de référence ? Ne dépend pas de la
+# précision de la référence (mètre ruban) : c'est ce qui mesure vraiment la
+# sensibilité à l'initialisation. Tolérance plus large pour la brute force,
+# dont le résultat est arrondi à son pas (4 cm, 1,5°).
+CONV_TOL = {"brute force": (0.04, 1.5)}
+CONV_DEFAULT = (0.02, 1.0)
 
 
 # ===================================================================== données
@@ -129,6 +136,11 @@ def _methods(kind, ref):
 
 # ==================================================================== exécution
 def run(refs, cases, levels=INIT_LEVELS, draws=1, seed=1, log=print, dataset="simulation"):
+    # pose « ancre » de chaque méthode : trouvée en partant de la pose de référence
+    anchors = {}
+    for ci, (kind, key, local, truth) in enumerate(cases):
+        for name, f in _methods(kind, refs[kind][key]).items():
+            anchors[(ci, name)] = f(refs[kind][key], local, truth).pose
     rows = []
     for li, level in enumerate(levels):
         for ci, (kind, key, local, truth) in enumerate(cases):
@@ -141,39 +153,108 @@ def run(refs, cases, levels=INIT_LEVELS, draws=1, seed=1, log=print, dataset="si
                     r = f(ref, local, init)
                     e_xy = float(np.hypot(r.pose.x - truth.x, r.pose.y - truth.y))
                     e_th = float(np.degrees(abs(L.wrap(r.pose.theta - truth.theta))))
+                    a = anchors[(ci, name)]
+                    tol = CONV_TOL.get(name, CONV_DEFAULT)
+                    conv = (np.hypot(r.pose.x - a.x, r.pose.y - a.y) < tol[0]
+                            and abs(np.degrees(L.wrap(r.pose.theta - a.theta))) < tol[1])
                     rows.append(dict(jeu=dataset, reference=REF_LABEL[kind], methode=name, cas=ci, scan=key, tirage=k,
                                      init_m=level[0], init_deg=level[1], err_m=e_xy, err_deg=e_th,
                                      temps_ms=r.time_s * 1000, score=r.score, poses_evaluees=r.n_eval,
-                                     reussite=int(e_xy < SUCCESS_XY and e_th < SUCCESS_TH)))
+                                     reussite=int(e_xy < SUCCESS_XY and e_th < SUCCESS_TH), convergence=int(conv)))
         log(f"  erreur initiale {level[0]:.2f} m / {level[1]:.0f}° : fait")
     return rows
 
 
 # ========================================================================= réel
-def real_dataset(session: Path, poses_file: Path, scans=range(1, 10)):
+SAME_MARK = 0.15   # deux poses à moins de 15 cm : même repère au sol, QUEL QUE SOIT l'angle
+                   # (un lidar 360° tourné sur place voit les mêmes points dans le repère de la salle)
+NEAR_SCAN = 1.5            # entre scans : référence à 1,5 m au plus (« pris près »)
+
+
+def parse_selection(text) -> set[int] | None:
+    """« 1-9,12 » -> {1, ..., 9, 12} ; None ou "" -> tous."""
+    if not text:
+        return None
+    out = set()
+    for part in str(text).replace(" ", "").split(","):
+        if "-" in part:
+            lo, hi = part.split("-", 1)
+            out |= set(range(int(lo), int(hi) + 1))
+        elif part:
+            out.add(int(part))
+    return out
+
+
+def _num(name):
+    d = "".join(c for c in name if c.isdigit())
+    return int(d) if d else 0
+
+
+def _same_mark(p: Pose, q: Pose) -> bool:
+    return bool(np.hypot(p.x - q.x, p.y - q.y) < SAME_MARK)
+
+
+def real_dataset(session: Path, poses_file: Path, scans=None, log=print):
+    """Cas de test sur une session réelle.
+    - grid map et carte vectorielle construites SANS le scan testé ni les autres
+      captures faites au même repère (sinon un scan presque identique serait
+      dans la carte et la localisation serait faussement facile) ;
+    - entre scans : référence = le scan le plus proche pris à un AUTRE repère,
+      à moins de NEAR_SCAN m ;
+    - paires de captures au même repère : servent à mesurer la répétabilité.
+    `scans` : numéros à utiliser, ex. "1-9,12" (None = tous ceux qui ont une pose)."""
     from carto.register import clean_scan
     from carto.scan import load_poses, load_scans
     truth = load_poses(poses_file)
-    names = [f"scan{i}" for i in scans]
-    loaded = {s.name: clean_scan(s) for s in load_scans(sorted(session.glob("scan*.csv"))) if s.name in names}
-    names = [n for n in names if n in loaded and n in truth]
-    refs, cases = {"grid": {}, "vector": {}, "cloud": {}, "cloud_l": {}}, []
+    sel = set(scans) if isinstance(scans, (set, range, list)) else parse_selection(scans)
+    files = sorted(session.glob("scan*.csv"), key=lambda f: _num(f.stem))
+    loaded = {s.name: clean_scan(s) for s in load_scans(files)
+              if s.name in truth and (sel is None or _num(s.name) in sel)}
+    names = sorted(loaded, key=_num)
+    if len(names) < 2:
+        raise SystemExit(f"Il faut au moins 2 scans avec une pose dans {poses_file} (trouvés : {names}).")
+    if all((truth[n].x, truth[n].y, truth[n].theta) == (0, 0, 0) for n in names):
+        raise SystemExit(f"Toutes les poses de {poses_file} valent (0, 0, 0) : saisissez les positions mesurées "
+                         "dans Lidar Plot (éditeur de position) avant d'évaluer.")
+    refs, cases, repeats = {"grid": {}, "vector": {}, "cloud": {}, "cloud_l": {}}, [], []
     for n in names:
-        others = [(loaded[m], truth[m]) for m in names if m != n]
-        refs["grid"][n] = L.GridRef(build_grid(others, 0.05))
-        refs["vector"][n] = L.VectorRef(build_vector_map(others).segments)
+        same = [m for m in names if _same_mark(truth[m], truth[n])]
+        repeats += [(n, m) for m in same if _num(m) > _num(n)]
+        others = [m for m in names if m not in same]
+        if not others:
+            log(f"  {n} : aucun scan pris à un autre repère, ignoré")
+            continue
+        pairs = [(loaded[m], truth[m]) for m in others]
+        refs["grid"][n] = L.GridRef(build_grid(pairs, 0.05))
+        refs["vector"][n] = L.VectorRef(build_vector_map(pairs).segments)
         local = loaded[n].local_xy()
         cases.append(("grid", n, local, truth[n]))
         cases.append(("vector", n, local, truth[n]))
-        # plus proche voisin = scan de référence
-        m = min((m for m in names if m != n), key=lambda m: np.hypot(truth[m].x - truth[n].x, truth[m].y - truth[n].y))
+        m = min(others, key=lambda m: np.hypot(truth[m].x - truth[n].x, truth[m].y - truth[n].y))
+        if np.hypot(truth[m].x - truth[n].x, truth[m].y - truth[n].y) > NEAR_SCAN:
+            log(f"  {n} : pas de scan de référence à moins de {NEAR_SCAN} m (localisation entre scans ignorée)")
+            continue
         key = f"{n}->{m}"
         pts = loaded[m].world_xy(truth[m])
         refs["cloud"][key] = L.CloudRef(pts)
         refs["cloud_l"][key] = L.CloudRef(pts, point_to_line=True)
         cases.append(("cloud", key, local, truth[n]))
         cases.append(("cloud_l", key, local, truth[n]))
-    return refs, cases, loaded, truth
+    return refs, cases, loaded, truth, repeats
+
+
+def repeatability(loaded, truth, repeats):
+    """Pour deux captures au même repère : pose trouvée par Gauss-Newton
+    (point-à-droite, scan m comme référence) comparée à la pose saisie. Si le
+    robot a été reposé sur le repère entre les deux, l'écart mesure la précision
+    du placement (donc de la pose de référence) ; sinon, le bruit du lidar."""
+    out = []
+    for n, m in repeats:
+        ref = L.CloudRef(loaded[m].world_xy(truth[m]), point_to_line=True)
+        r = L.gauss_newton(ref, loaded[n].local_xy(), truth[n])
+        out.append((n, m, float(np.hypot(r.pose.x - truth[n].x, r.pose.y - truth[n].y)),
+                    float(np.degrees(abs(L.wrap(r.pose.theta - truth[n].theta)))), r.score))
+    return out
 
 
 def reference_uncertainty(refs, cases):
@@ -189,6 +270,22 @@ def reference_uncertainty(refs, cases):
 
 
 # ===================================================================== synthèse
+def wilson(k, n, z=1.96):
+    """Intervalle de confiance à 95 % d'une proportion k/n (Wilson) : avec 16 essais,
+    10/16 = 62 % veut dire « entre 39 et 82 % »."""
+    if n == 0:
+        return 0.0, 1.0
+    p = k / n
+    c = (p + z * z / (2 * n)) / (1 + z * z / n)
+    h = z * np.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / (1 + z * z / n)
+    return max(0.0, c - h), min(1.0, c + h)
+
+
+def _pct(rate, n, ci=True):
+    lo, hi = wilson(round(rate * n), n)
+    return f"{rate:.0%}" + (f" [{lo:.0%}–{hi:.0%}]" if ci else "")
+
+
 def summarize(rows):
     """{(référence, méthode, niveau)} -> statistiques."""
     groups = {}
@@ -198,7 +295,9 @@ def summarize(rows):
     for k, g in groups.items():
         e, a = np.array([r["err_m"] for r in g]), np.array([r["err_deg"] for r in g])
         ok = np.array([r["reussite"] for r in g], bool)
-        out[k] = dict(n=len(g), reussite=ok.mean(),
+        cv = np.array([r.get("convergence", 0) for r in g], bool)
+        out[k] = dict(n=len(g), reussite=ok.mean(), convergence=cv.mean(),
+                      mean_m=float(e.mean()), std_m=float(e.std()), mean_deg=float(a.mean()), std_deg=float(a.std()),
                       med_m=float(np.median(e)), p90_m=float(np.percentile(e, 90)),
                       med_deg=float(np.median(a)), p90_deg=float(np.percentile(a, 90)),
                       ok_m=float(np.median(e[ok])) if ok.any() else np.nan,
@@ -206,6 +305,41 @@ def summarize(rows):
                       temps_ms=float(np.mean([r["temps_ms"] for r in g])),
                       poses=float(np.mean([r["poses_evaluees"] for r in g])))
     return out
+
+
+def _threshold_figure(rows, out: Path, tag, level, unc=None):
+    """Part des essais dont l'écart est sous le seuil, en fonction du seuil
+    (position et angle) : rend explicite le choix des seuils ; le palier montre
+    l'incertitude de la référence."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    refs = [r for r in REF_LABEL.values() if any(x["reference"] == r for x in rows)]
+    fig, axes = plt.subplots(2, len(refs), figsize=(4.4 * len(refs), 6.4), squeeze=False)
+    tx, ta = np.linspace(0, 0.20, 201), np.linspace(0, 10, 201)
+    for j, ref in enumerate(refs):
+        for m in sorted({r["methode"] for r in rows if r["reference"] == ref}):
+            g = [r for r in rows if r["reference"] == ref and r["methode"] == m and (r["init_m"], r["init_deg"]) == level]
+            if not g:
+                continue
+            e = np.array([r["err_m"] for r in g]); a = np.array([r["err_deg"] for r in g])
+            axes[0, j].plot(tx * 100, [(e < t).mean() * 100 for t in tx], label=m)
+            axes[1, j].plot(ta, [(a < t).mean() * 100 for t in ta], label=m)
+        for row, (thr, u, unit) in enumerate(((SUCCESS_XY * 100, unc and unc[0] * 100, "cm"), (SUCCESS_TH, unc and unc[1], "°"))):
+            ax = axes[row, j]
+            ax.axvline(thr, color="k", ls=":", lw=1)
+            if u:
+                ax.axvspan(0, u, color="tab:orange", alpha=0.12, label="incertitude de la référence")
+            ax.set_xlabel(f"seuil ({unit})")
+            ax.grid(alpha=0.3)
+        axes[0, j].set_title(ref, fontsize=10)
+        axes[0, j].legend(fontsize=7)
+    axes[0, 0].set_ylabel("% d'essais sous le seuil (position)")
+    axes[1, 0].set_ylabel("% d'essais sous le seuil (angle)")
+    fig.suptitle(f"Taux de réussite selon le seuil choisi — départ {level[0]:.2f} m / {level[1]:.0f}° — {tag}")
+    fig.tight_layout()
+    fig.savefig(out / f"seuils_{tag}.png", dpi=120)
+    plt.close(fig)
 
 
 def _figures(rows, summ, out: Path, tag):
@@ -290,26 +424,42 @@ def _example_figure(refs, cases, out: Path, tag, method="Gauss-Newton"):
     plt.close(fig)
 
 
-def _table(summ, level, refs):
-    lines = ["| référence | méthode | réussite | erreur position médiane / p90 | erreur angle médiane / p90 | "
-             "précision si réussite | temps moyen | poses évaluées |", "|---|---|---|---|---|---|---|---|"]
+def _table(summ, level, refs, absolute=True):
+    """absolute=False (réel, référence mesurée ou assemblée) : pas de verdict
+    réussi/échoué sur l'écart à la référence, seulement écart moyen ± écart-type."""
+    if absolute:
+        head = ("| référence | méthode | réussite [IC 95 %] | convergence | erreur position médiane / p90 | "
+                "erreur angle médiane / p90 | temps moyen | poses évaluées |")
+    else:
+        head = ("| référence | méthode | convergence [IC 95 %] | écart à la référence : position moyenne ± σ | "
+                "angle moyen ± σ | médiane position / angle | temps moyen | poses évaluées |")
+    lines = [head, "|---|---|---|---|---|---|---|---|"]
     for ref in refs:
         for (r, m, l), s in sorted(summ.items(), key=lambda kv: (kv[0][0], kv[1]["temps_ms"])):
             if r != ref or l != level:
                 continue
-            ok = f"{s['ok_m'] * 100:.1f} cm / {s['ok_deg']:.2f}°" if np.isfinite(s["ok_m"]) else "—"
-            lines.append(f"| {r} | {m} | {s['reussite']:.0%} ({s['n']}) | {s['med_m'] * 100:.1f} / {s['p90_m'] * 100:.1f} cm | "
-                         f"{s['med_deg']:.2f} / {s['p90_deg']:.2f}° | {ok} | {s['temps_ms']:.0f} ms | {s['poses']:.0f} |")
+            if absolute:
+                lines.append(f"| {r} | {m} | {_pct(s['reussite'], s['n'])} ({s['n']}) | {s['convergence']:.0%} | "
+                             f"{s['med_m'] * 100:.1f} / {s['p90_m'] * 100:.1f} cm | {s['med_deg']:.2f} / {s['p90_deg']:.2f}° | "
+                             f"{s['temps_ms']:.0f} ms | {s['poses']:.0f} |")
+            else:
+                lines.append(f"| {r} | {m} | {_pct(s['convergence'], s['n'])} ({s['n']}) | "
+                             f"{s['mean_m'] * 100:.1f} ± {s['std_m'] * 100:.1f} cm | {s['mean_deg']:.2f} ± {s['std_deg']:.2f}° | "
+                             f"{s['med_m'] * 100:.1f} cm / {s['med_deg']:.2f}° | {s['temps_ms']:.0f} ms | {s['poses']:.0f} |")
     return lines
 
 
-def _sensitivity_table(summ, refs, levels):
+def _sensitivity_table(summ, refs, levels, key="reussite"):
     head = "| référence | méthode | " + " | ".join(f"{d:.2f} m / {a:.0f}°" for d, a in levels) + " |"
     lines = [head, "|---|---|" + "---|" * len(levels)]
     for ref in refs:
         for m in sorted({k[1] for k in summ if k[0] == ref}):
             vals = [summ.get((ref, m, l)) for l in levels]
-            lines.append(f"| {ref} | {m} | " + " | ".join(f"{v['reussite']:.0%}" if v else "—" for v in vals) + " |")
+            lines.append(f"| {ref} | {m} | " + " | ".join(f"{v[key]:.0%}" if v else "—" for v in vals) + " |")
+    n = next(iter(summ.values()))["n"] if summ else 0
+    lo, hi = wilson(n // 2, n)
+    lines += ["", f"Chaque case porte sur {n} essais : à 50 %, l'intervalle de confiance à 95 % va de {lo:.0%} à {hi:.0%} "
+                  "(Wilson). Deux cases qui diffèrent de moins de ~20 points ne sont pas significativement différentes."]
     return lines
 
 
@@ -345,35 +495,64 @@ def _next_version(base: Path) -> Path:
     return out
 
 
-def evaluate(out_base="resultats/localisation", real_session=None, real_poses=None, quick=False, log=print):
-    out = _next_version(Path(out_base))
+def evaluate(out_base="resultats/localisation", real_session=None, real_poses=None, quick=False, log=print,
+             scans=None, seuils=None, incertitude=None, sans_simulation=False):
+    """`real_poses` : poses de référence du réel. Par défaut, les poses de
+    l'assemblage (carte/version_N) ; "mesurees" -> poses.json de la session
+    (positions mesurées et saisies dans Lidar Plot, ou poses RobotControl).
+    `incertitude` : (m, °) de ces mesures, recopiée dans le rapport."""
+    global SUCCESS_XY, SUCCESS_TH
+    if seuils:
+        SUCCESS_XY, SUCCESS_TH = float(seuils[0]), float(seuils[1])
     levels = INIT_LEVELS[1:4] if quick else INIT_LEVELS
     t0 = time.time()
-    log("Simulation : construction des références…")
-    refs, cases = sim_dataset(n_map_cases=4 if quick else 12, n_per_ref=1 if quick else 3)
-    rows = run(refs, cases, levels, log=log)
-    sim_summ = summarize(rows)
-    _figures(rows, sim_summ, out, "simulation")
-    _example_figure(refs, cases, out, "simulation")
-
-    real_summ, unc, real_rows = None, {}, []
-    if real_session:
+    real_data = None
+    if real_session:  # contrôles d'abord : pas de dossier version_N vide en cas d'erreur
         session = Path(real_session)
-        poses = Path(real_poses) if real_poses else _latest_poses(session)
+        measured = real_poses == "mesurees"
+        poses = session / "poses.json" if measured else Path(real_poses) if real_poses else _latest_poses(session)
+        if not poses.exists():
+            raise SystemExit(f"Pas de fichier {poses}. Ouvrez la session dans Lidar Plot et saisissez les poses mesurées "
+                             "(ou importez les lidar_scan.csv de RobotControl avec « 📥 Importer » : leur pose est reprise).")
         log(f"Réel : {session.name} (poses de référence : {poses})…")
-        rrefs, rcases, _, _ = real_dataset(session, poses)
+        real_data = real_dataset(session, poses, scans, log=log)
+    out = _next_version(Path(out_base))
+    rows, sim_summ = [], {}
+    if not sans_simulation:
+        log("Simulation : construction des références…")
+        refs, cases = sim_dataset(n_map_cases=4 if quick else 12, n_per_ref=1 if quick else 3)
+        rows = run(refs, cases, levels, log=log)
+        sim_summ = summarize(rows)
+        _figures(rows, sim_summ, out, "simulation")
+        _example_figure(refs, cases, out, "simulation")
+        _threshold_figure(rows, out, "simulation", levels[min(STANDARD_LEVEL, len(levels) - 1)]
+                          if levels is INIT_LEVELS else levels[len(levels) // 2])
+
+    real_summ, unc, real_rows, real = None, {}, [], None
+    if real_data:
+        rrefs, rcases, loaded, truth, repeats = real_data
+        rep_ = repeatability(loaded, truth, repeats)
+        unc_source = "annoncée"
+        if incertitude is None and rep_:  # par défaut : la répétabilité mesurée (robot reposé sur le repère)
+            ev = np.array([[r[2], r[3]] for r in rep_])
+            incertitude, unc_source = (float(np.median(ev[:, 0])), float(np.median(ev[:, 1]))), "répétabilité"
+        real = dict(session=session, poses=poses, measured=measured, incertitude=incertitude, unc_source=unc_source,
+                    scans=sorted({c[1].split("->")[0] for c in rcases}, key=_num), repeat=rep_,
+                    n_cloud=sum(c[0] == "cloud" for c in rcases))
         unc = reference_uncertainty(rrefs, rcases)
         real_rows = run(rrefs, rcases, levels, draws=1 if quick else 2, log=log, dataset="réel")
         real_summ = summarize(real_rows)
         _figures(real_rows, real_summ, out, "reel")
         _example_figure(rrefs, rcases, out, "reel")
+        _threshold_figure(real_rows, out, "reel", levels[min(STANDARD_LEVEL, len(levels) - 1)]
+                          if levels is INIT_LEVELS else levels[len(levels) // 2], incertitude if measured else None)
 
     with open(out / "resultats.csv", "w", newline="", encoding="utf-8-sig") as f:
-        w = csv.DictWriter(f, fieldnames=list(rows[0]), delimiter=";")
+        w = csv.DictWriter(f, fieldnames=list((rows or real_rows)[0]), delimiter=";")
         w.writeheader()
         for r in rows + real_rows:
             w.writerow({k: (f"{v:.5f}".replace(".", ",") if isinstance(v, float) else v) for k, v in r.items()})
-    _report(out, rows, sim_summ, real_rows, real_summ, unc, levels, time.time() - t0, real_session)
+    _report(out, rows, sim_summ, real_rows, real_summ, unc, levels, time.time() - t0, real)
     log(f"Résultats dans {out}")
     return out
 
@@ -386,67 +565,125 @@ def _latest_poses(session: Path) -> Path:
     return vers[-1]
 
 
-def _report(out, rows, summ, real_rows, real_summ, unc, levels, dt, session):
+def _report(out, rows, summ, real_rows, real_summ, unc, levels, dt, real):
     refs = [r for r in REF_LABEL.values() if any(x["reference"] == r for x in rows)]
     std = levels[min(STANDARD_LEVEL, len(levels) - 1)] if levels is INIT_LEVELS else levels[len(levels) // 2]
+    why = (" 5 cm ≈ une cellule de la grid map et ≈ 1,5 × la précision du LD06 (30 mm, datasheet) ; "
+           "2° décale un mur situé à 3 m de 10 cm, au-delà la carte construite avec cette pose « bave »."
+           if (SUCCESS_XY, SUCCESS_TH) == (0.05, 2.0) else " (seuils choisis avec `--seuils`).")
     Lx = ["# Localisation par scan matching — évaluation chiffrée", "",
           f"Généré par `python -m carto evaluer` en {dt:.0f} s.", "",
           "## Protocole", "",
           "- **Mêmes scans, mêmes poses initiales** pour toutes les méthodes : pour chaque scan et chaque niveau "
           "d'erreur initiale, la pose de départ est tirée une fois (graine fixe) puis donnée à chaque méthode.",
-          "- **Erreur de la pose initiale** : décalage de 75 à 100 % de d mètres dans une direction au hasard et de ±(75 à 100 % de a) degrés. "
-          "Niveaux : " + ", ".join(f"{d:.2f} m / {a:.0f}°" for d, a in levels) + ".",
-          f"- **Réussite** : erreur de position < {SUCCESS_XY * 100:.0f} cm **et** erreur angulaire < {SUCCESS_TH:.0f}°. "
-          "5 cm ≈ une cellule de la grid map et ≈ 1,5 × la précision du LD06 (30 mm, datasheet) ; "
-          "2° décale un mur situé à 3 m de 10 cm, au-delà la carte construite avec cette pose « bave ».",
-          "- **Fenêtre de recherche** des méthodes globales (brute force, multi-résolution) : ±0,50 m et ±15°, "
-          "fixée à l'avance (sans connaître l'erreur réelle). Une erreur initiale de 20° est donc hors fenêtre : "
-          "l'échec est attendu et montre la limite de ces méthodes.",
+          "- **Erreur de la pose initiale** : décalage de 75 à 100 % de d mètres dans une direction au hasard et de "
+          "±(75 à 100 % de a) degrés. Niveaux : " + ", ".join(f"{d:.2f} m / {a:.0f}°" for d, a in levels) + ".",
+          f"- **Réussite** : erreur de position < {SUCCESS_XY * 100:.0f} cm **et** erreur angulaire < {SUCCESS_TH:g}°." + why,
+          "- **Convergence** : la méthode, partie de la pose fausse, retombe sur la pose qu'elle trouve en partant de la "
+          f"pose de référence (à {CONV_DEFAULT[0] * 100:.0f} cm et {CONV_DEFAULT[1]:g}° près ; "
+          f"{CONV_TOL['brute force'][0] * 100:.0f} cm et {CONV_TOL['brute force'][1]:g}° pour la brute force, arrondie à son pas). "
+          "Elle ne dépend pas de la précision de la référence : c'est elle qui mesure la sensibilité à l'initialisation "
+          "sur le réel. Les calculs directs donnent la même réponse quel que soit le départ : leur convergence vaut "
+          "presque toujours 100 %, même quand la réponse est fausse ; les juger sur l'écart à la référence.",
+          "- **IC 95 %** : intervalle de confiance de Wilson d'un taux calculé sur peu d'essais.",
+          "- **Fenêtre de recherche** de la brute force : ±0,50 m et ±15° autour du départ, fixée à l'avance. Au-delà "
+          "de 15° (niveau 20°) la vraie pose peut être hors fenêtre : l'échec est attendu. La multi-résolution part de "
+          "la même fenêtre mais **se recentre** sur le meilleur résultat à chaque niveau (±20 cm / ±8° de plus au "
+          "niveau 2) : elle rattrape souvent une pose en bord de fenêtre.",
+          "- **Calcul direct par moments** : le centre de gravité d'un scan dépend de ce que le lidar voit et de la "
+          "densité de points (plus forte près du lidar) ; dès que le robot bouge de 30 cm ces deux choses changent, "
+          "d'où un biais de 10 à 20 cm même avec une pose de départ presque exacte. Ce n'est pas un bug.",
           "- **Temps** : temps de calcul de la localisation seule (la référence — champ de distance, index — est "
-          "construite une fois, avant), Python + numpy sur ce PC.", "",
-          "## Simulation (vérité terrain exacte)", "",
-          "Salle simulée en L (8 × 6 m, cloison, pilier) ; bruit des distances 30 mm, 2 % de mesures sans écho, 450 points/tour.",
-          "- grid map (cellules 5 cm) et carte vectorielle construites à partir de 4 scans simulés (pos1..pos4) ;",
-          "- scans à localiser sur ces cartes : poses tirées au hasard dans la salle (à plus de 40 cm des murs) ;",
-          "- entre scans : chaque scan pos1..pos4 est une référence ; scans à localiser pris à 30 cm et ±10° de sa position.", "",
-          f"### Comparaison à erreur initiale {std[0]:.2f} m / {std[1]:.0f}°", ""]
-    Lx += _table(summ, std, refs)
-    Lx += ["", "### Sensibilité à la pose initiale (taux de réussite)", ""]
-    Lx += _sensitivity_table(summ, refs, levels)
-    Lx += ["", "![sensibilité](sensibilite_simulation.png)", "", "![précision et temps](precision_temps_simulation.png)", "",
-           "![exemples](exemples_simulation.png)", ""]
+          "construite une fois, avant), Python + numpy sur ce PC.", ""]
+    if summ:
+        Lx += ["## Simulation (vérité terrain exacte)", "",
+               "Salle simulée en L (8 × 6 m, cloison, pilier) ; bruit des distances 30 mm, 2 % de mesures sans écho, 450 points/tour.",
+               "- grid map (cellules 5 cm) et carte vectorielle construites à partir de 4 scans simulés (pos1..pos4) ;",
+               "- scans à localiser sur ces cartes : poses tirées au hasard dans la salle (à plus de 40 cm des murs) ;",
+               "- entre scans : chaque scan pos1..pos4 est une référence ; scans à localiser pris à 30 cm et ±10° de sa position.", "",
+               f"### Comparaison à erreur initiale {std[0]:.2f} m / {std[1]:.0f}°", ""]
+        Lx += _table(summ, std, refs)
+        Lx += ["", "### Sensibilité à la pose initiale (taux de réussite)", ""]
+        Lx += _sensitivity_table(summ, refs, levels)
+        Lx += ["", "Attention : la simulation génère les scans avec le même modèle de salle et de bruit que celui "
+                   "qu'utilisent les méthodes ; elle ne reproduit pas les défauts propres au LD06 (bords d'objets, "
+                   "vitres, reflets). Ses taux de réussite sont donc un maximum, pas une prévision du réel.", "",
+               "![sensibilité](sensibilite_simulation.png)", "", "![seuils](seuils_simulation.png)", "",
+               "![précision et temps](precision_temps_simulation.png)", "", "![exemples](exemples_simulation.png)", ""]
     if real_summ:
         rrefs = [r for r in REF_LABEL.values() if any(x["reference"] == r for x in real_rows)]
-        Lx += ["## Scans réels de la salle", "",
-               f"Session `{Path(session).name}`, scans 1 à 9 (les scans 10 à 14, lidar posé au sol, ne voient presque pas les murs).",
-               "- **Pose de référence** : pose obtenue à l'assemblage (recalage global + ICP). Les positions n'ont pas été "
-               "mesurées au mètre sur le robot pendant la capture : la référence est donc elle-même une estimation.",
-               "- grid map et carte vectorielle construites **sans** le scan testé (sinon le scan se retrouverait dans sa propre carte) ;",
-               "- entre scans : chaque scan contre le scan dont la position assemblée est la plus proche.", "",
-               "### Incertitude des poses de référence", "",
+        scans = real["scans"]
+        Lx += ["## Scans réels", "",
+               f"Session `{real['session'].name}`, {len(scans)} scans : {', '.join(scans)}. "
+               f"Poses de référence : `{real['poses']}`."]
+        if real["measured"]:
+            inc = real["incertitude"]
+            Lx += ["- **Pose de référence** : position **mesurée** sur le robot (repères au sol, mètre) et saisie dans "
+                   "Lidar Plot ou dans RobotControl"
+                   + ((f", incertitude **±{inc[0] * 100:.1f} cm et ±{inc[1]:.2g}°** (" +
+                       ("valeur annoncée par l'opérateur" if real["unc_source"] == "annoncée" else
+                        "estimée par la répétabilité : robot reposé sur le même repère") + ").") if inc else
+                      " ; incertitude de mesure inconnue (ni `--incertitude`, ni captures répétées au même repère)."),
+                   "- Les cartes sont construites avec les poses mesurées des AUTRES scans : leur erreur de mesure est "
+                   "donc à la fois dans la carte et dans la pose de référence. Sous cette incertitude, l'écart à la "
+                   "référence ne permet pas de dire quelle méthode est la plus précise : il n'y a donc **pas de verdict "
+                   "réussi/échoué** sur cet écart, seulement sa moyenne ± écart-type. Le taux de réussite est remplacé "
+                   "par la **convergence**."]
+        else:
+            Lx += ["- **Pose de référence** : pose obtenue à l'assemblage (recalage global + ICP). Les positions n'ont "
+                   "pas été mesurées sur le robot : la référence vient elle-même du scan matching. L'écart à cette "
+                   "référence mesure donc la **cohérence** entre méthodes, **pas leur précision** absolue."]
+        Lx += [f"- grid map et carte vectorielle construites **sans** le scan testé ni les captures faites au même repère "
+               f"(poses à moins de {SAME_MARK * 100:.0f} cm, quel que soit l'angle) ;",
+               f"- entre scans : chaque scan contre le scan le plus proche pris à un autre repère (à moins de {NEAR_SCAN} m).", ""]
+        if real["repeat"]:
+            Lx += ["### Répétabilité : deux captures au même repère", "",
+                   "Pose de la 2e capture retrouvée sur la 1re (Gauss-Newton, point-à-droite), comparée aux poses saisies. "
+                   "Si le robot a été **reposé** sur le repère entre les deux captures, l'écart mesure la précision du "
+                   "placement, donc l'incertitude des poses de référence ; s'il n'a pas bougé, il mesure le bruit du lidar.", "",
+                   "| captures | écart de position | écart d'angle | score |", "|---|---|---|---|"]
+            for n, m, e, a, sc in real["repeat"]:
+                Lx.append(f"| {n} / {m} | {e * 100:.1f} cm | {a:.2f}° | {sc:.2f} |")
+            ev = np.array([[r[2], r[3]] for r in real["repeat"]])
+            Lx += ["", f"Médiane : **{np.median(ev[:, 0]) * 100:.1f} cm** et **{np.median(ev[:, 1]):.2f}°** "
+                       f"(maximum {ev[:, 0].max() * 100:.1f} cm, {ev[:, 1].max():.2f}°).", ""]
+        if not real["n_cloud"]:
+            Lx += [f"> Aucun cas « entre scans » : aucun scan n'a de voisin pris à un autre repère à moins de {NEAR_SCAN} m. "
+                   "Prévoir des repères proches les uns des autres (par paires à 30 cm).", ""]
+        Lx += ["### Précision du recalage (calcul, borne basse)", "",
                "Écart-type estimé par approximation de Laplace (Σ = s² (JᵀWJ)⁻¹, s² = variance des distances "
-               "point → carte vectorielle construite sans ce scan) :", "",
+               "point → carte vectorielle construite sans ce scan), à la pose de référence. C'est la précision "
+               "avec laquelle le scan « tient » sur la carte, **pas** l'incertitude du placement du robot sur le repère :", "",
                "| scan | σx | σy | σθ |", "|---|---|---|---|"]
         for k, (sx, sy, st) in unc.items():
             Lx.append(f"| {k} | {sx * 1000:.1f} mm | {sy * 1000:.1f} mm | {st:.3f}° |")
         if unc:
             a = np.array(list(unc.values()))
             Lx += ["", f"Moyenne : σx = {a[:, 0].mean() * 1000:.1f} mm, σy = {a[:, 1].mean() * 1000:.1f} mm, "
-                       f"σθ = {a[:, 2].mean():.3f}°. C'est une borne optimiste (bruit supposé indépendant) : "
-                       "l'incertitude réelle est surtout due aux erreurs de l'assemblage lui-même et aux objets "
-                       "déplacés entre scans, de l'ordre du centimètre et du demi-degré (écart entre méthodes "
-                       "convergées ci-dessous). Une pose mesurée au mètre ruban et au rapporteur serait "
-                       "connue à environ ±2 cm et ±2°, donc moins précise que les méthodes testées.", ""]
+                       f"σθ = {a[:, 2].mean():.3f}°. C'est une borne optimiste (bruit supposé indépendant d'un point "
+                       "à l'autre) : l'écart scan par scan ci-dessous, et la répétabilité si elle a été mesurée, "
+                       "donnent l'incertitude réaliste.", ""]
         Lx += _per_scan_table(real_rows, rrefs)
         Lx += [f"### Comparaison à erreur initiale {std[0]:.2f} m / {std[1]:.0f}°", ""]
-        Lx += _table(real_summ, std, rrefs)
-        Lx += ["", "### Sensibilité à la pose initiale (taux de réussite)", ""]
+        Lx += _table(real_summ, std, rrefs, absolute=False)
+        Lx += ["", "### Sensibilité à la pose initiale (taux de convergence)", ""]
+        Lx += _sensitivity_table(real_summ, rrefs, levels, key="convergence")
+        Lx += ["", f"Pour information, part des essais à moins de {SUCCESS_XY * 100:.0f} cm et {SUCCESS_TH:g}° de la "
+                   "référence (dépend surtout de la précision de la référence) :", ""]
         Lx += _sensitivity_table(real_summ, rrefs, levels)
-        Lx += ["", "![sensibilité](sensibilite_reel.png)", "", "![précision et temps](precision_temps_reel.png)", "",
-               "![exemples](exemples_reel.png)", ""]
+        Lx += ["", "![sensibilité](sensibilite_reel.png)", "", "![seuils](seuils_reel.png)", "",
+               "![précision et temps](precision_temps_reel.png)", "", "![exemples](exemples_reel.png)", ""]
+        if real["measured"] and real["incertitude"] and (real["incertitude"][1] >= SUCCESS_TH * 0.5
+                                                         or real["incertitude"][0] >= SUCCESS_XY * 0.5):
+            Lx += [f"> **Attention** : l'incertitude des poses mesurées (±{real['incertitude'][0] * 100:.1f} cm, "
+                   f"±{real['incertitude'][1]:.2g}°) est du même ordre que les seuils ({SUCCESS_XY * 100:.0f} cm, "
+                   f"{SUCCESS_TH:g}°). Un écart au-dessus du seuil peut venir de la mesure et non de la méthode : "
+                   "juger les méthodes sur la convergence.", ""]
     Lx += ["## Fichiers", "", "- `resultats.csv` : une ligne par essai (séparateur `;`, virgule décimale : s'ouvre dans Excel) ;",
-           "- `sensibilite_*.png`, `precision_temps_*.png`, `exemples_*.png` : figures du rapport.", ""]
+           "- `sensibilite_*.png`, `seuils_*.png`, `precision_temps_*.png`, `exemples_*.png` : figures du rapport.", ""]
     (out / "synthese.md").write_text("\n".join(Lx), encoding="utf-8")
     (out / "parametres.json").write_text(json.dumps(dict(
         reussite_m=SUCCESS_XY, reussite_deg=SUCCESS_TH, niveaux=levels, sigma_score=L.SIGMA,
-        fenetre_brute_force=[0.5, 15.0], pas_brute_force=[0.04, 1.5], niveaux_multires=L.LEVELS), indent=2), "utf-8")
+        fenetre_brute_force=[0.5, 15.0], pas_brute_force=[0.04, 1.5], niveaux_multires=L.LEVELS,
+        poses_reel=str(real["poses"]) if real else None, poses_mesurees=bool(real and real["measured"]),
+        incertitude_mesure=real["incertitude"] if real else None), indent=2), "utf-8")

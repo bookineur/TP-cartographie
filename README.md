@@ -157,6 +157,25 @@ python -m carto localiser data/sim/pos1_000.csv --ref resultats/.../gridmap.npz 
 
 `localiser` accepte une grid map (`gridmap.npz`), une carte vectorielle (`carte_vectorielle.txt` ou `vector_map.txt` du MapTool) ou un scan de référence (CSV, placé à la position écrite dans le fichier s'il vient du MapTool).
 
+### Séance de vrais tests avec le robot (TP 2)
+
+Protocole vérifié par une relecture à 5 avis (le « conseil ») : il vise à mesurer les **méthodes**, pas le mètre ruban.
+
+1. **Avant la séance** — répétition sans robot : `python -m carto simulate --tp2` crée `data/repetition_tp2/` (scans, `poses.json` « mesurées » avec ~1,5 cm / 1,5° d'erreur, `verite.json`, mêmes scans au format RobotControl dans `robotcontrol/`). Ouvrez-la dans Lidar Plot et faites tout le déroulé une fois.
+2. **Préparer la salle** : origine = un coin, axes le long des murs. Repères au scotch : 3 ou 4 repères « principaux » + des **paires à écart connu** (30 cm mesurés à la règle) pour la localisation entre scans (moins de 1,5 m entre repères voisins). Marquer sur le robot le **centre du lidar** : c'est lui qu'on pose sur la croix (la pose est celle du lidar, pas du châssis).
+3. **Les 5 premières minutes** : un essai complet (capture → import → « Localiser ») ; poser un objet à une position connue (ex. 1 m devant le lidar) et vérifier qu'il apparaît au bon endroit (sinon : lidar monté à l'envers, cocher « Corriger miroir »).
+4. **Chaque capture** : poser le robot, mesurer x, y au mètre ; **θ à la règle** (règle contre le châssis, deux points à 1 m d'écart), pas à l'œil ; saisir x, y, θ dans l'éditeur de position de Lidar Plot, puis Capturer. Avec **RobotControl** : saisir la pose **et cliquer « Envoyer Pose »** (sinon le fichier garde l'ancienne pose), lancer le scan, renommer aussitôt `lidar_scan.csv` en `scan_NN_repereK.csv`, puis « 📥 Importer » dans Lidar Plot (fichiers remis dans l'ordre d'enregistrement ; alerte si deux scans ont la même pose). θ est arrondi au degré par RobotControl.
+5. **Répétabilité** : reposer le robot **au moins 3 fois** sur chacun des repères principaux (en le retirant entre deux captures) : c'est ce qui chiffre l'incertitude de vos poses mesurées.
+6. **Scène** : personne dans le champ du lidar pendant les captures ; noter tout objet déplacé ; garder tous les fichiers bruts.
+7. **Localiser un scan** : le sélectionner → « ◎ Localiser ce scan… » : référence (grid map ou carte vectorielle des autres scans, scan voisin, ou fichier `gridmap.npz` / `vector_map.txt` / scan), départ (pose saisie, ou pose saisie + erreur), méthode (ou toutes). Le tableau donne l'écart à la pose saisie ; la carte montre le départ (× orange) et la pose trouvée (× blanc). Si toutes les méthodes s'accordent sur une pose loin de la saisie, la fenêtre le dit : c'est la saisie à vérifier. Chaque essai est ajouté à `<session>/localisation_essais.csv`.
+8. **Évaluation complète** : bouton « Lancer l'évaluation » de la même fenêtre, ou
+   `python -m carto evaluer --reel data/<session> --mesurees --sans-simulation`
+   (`--incertitude 0.02 2` pour imposer l'incertitude ; sinon elle est estimée par la répétabilité ; `--scans 1-12`, `--seuils 0.05 2`). Rapport `<session>/localisation/version_N/synthese.md`.
+
+Comment lire le rapport sur le réel : le **taux de convergence** (la méthode retombe-t-elle sur la même pose quel que soit le départ ?) mesure la sensibilité à l'initialisation ; l'**écart à la pose mesurée** (moyenne ± écart-type) est donné sans verdict, car il contient l'erreur du mètre ruban ; la **répétabilité** chiffre cette erreur. Les taux sont donnés avec leur intervalle de confiance (peu d'essais).
+
+Détails : les captures faites au même endroit (à moins de 15 cm, **quel que soit l'angle**) sont exclues de la carte du scan testé, sinon un scan presque identique serait dans sa propre carte. Pour construire une carte de la séance avec `assemble`, ajouter `--sans-redressement` (sinon la carte est tournée pour aligner les murs sur les axes, ce qui décale la comparaison avec vos poses mesurées). En ligne de commande, `localiser --ref scanK.csv` cherche la pose de la référence dans le fichier, puis dans `poses.json` à côté, sinon prévient ; `--ref-pose X Y θ` la donne explicitement.
+
 L'évaluation (`carto/evaluation.py`) suit l'énoncé : mêmes scans et mêmes poses initiales pour toutes les méthodes, erreur de position (m), erreur angulaire (°), temps, taux de réussite (< 5 cm et < 2°), cinq niveaux d'erreur initiale (de 5 cm / 2° à 50 cm / 20°), poses connues en simulation, et incertitude des poses de référence sur les scans réels. Le rapport `synthese.md` de chaque version contient les tableaux, les figures et le protocole.
 
 ---
@@ -383,7 +402,7 @@ Chaque segment garde `n_obs`, le nombre d'observations qui l'ont formé. `confir
 
 ## Validation
 
-- `pytest` : 57 tests (dont 19 pour la localisation : chaque méthode sur chaque référence, distances exactes, calculs directs). Ils couvrent :
+- `pytest` : 61 tests (dont 23 pour la localisation : chaque méthode sur chaque référence, distances exactes, calculs directs). Ils couvrent :
   - le paquet d'exemple de la doc LD06 (§3.3) : CRC = 0x50, vitesse 2152 °/s, angles de 324,27° à 334,70°, mesures 224 mm et 220 mm ;
   - la resynchronisation après un CRC faux et un paquet coupé entre deux lectures ;
   - le passage 360°→0° ;

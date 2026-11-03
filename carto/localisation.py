@@ -497,3 +497,40 @@ def pose_covariance(ref, local, pose: Pose, scale=0.05):
     except np.linalg.LinAlgError:
         return None
     return np.sqrt(np.abs(np.diag(cov)))
+
+
+def load_reference(path, ref_pose: Pose | None = None) -> Reference:
+    """Référence lue dans un fichier : grid map (.npz), carte vectorielle
+    (.txt, ou CSV dont l'en-tête commence par x1,y1,x2,y2 : vector_map.txt du
+    MapTool, carte_vectorielle.txt, segments.csv) ou scan de référence (CSV,
+    placé à `ref_pose`, sinon à la position du robot écrite dans le fichier,
+    sinon à l'origine)."""
+    from pathlib import Path
+    from carto.scan import load_scan_file
+    path = Path(path)
+    if path.suffix.lower() == ".npz":
+        return GridRef(OccupancyGrid.load(path))
+    rows = [l for l in path.read_text(encoding="utf-8-sig", errors="replace").splitlines()
+            if l.strip() and not l.lstrip().startswith("#")]
+    if path.suffix.lower() == ".txt" or (rows and rows[0].replace(" ", "").lower().startswith("x1,y1,x2,y2")):
+        segs = []
+        for l in rows:
+            try:
+                x1, y1, x2, y2 = map(float, l.replace(";", ",").split(",")[:4])
+            except ValueError:
+                continue  # en-tête
+            segs.append(Segment((x1, y1), (x2, y2)))
+        return VectorRef(segs)
+    s = load_scan_file(path)[0]
+    source = "argument" if ref_pose else "fichier" if s.meta.get("robot_pose") else None
+    pose = ref_pose or s.meta.get("robot_pose")
+    if pose is None:  # scan d'une session Lidar Plot : sa pose est dans poses.json, à côté
+        pj = path.parent / "poses.json"
+        if pj.exists():
+            from carto.scan import load_poses
+            pose = load_poses(pj).get(path.stem)
+            source = "poses.json" if pose is not None else None
+    ref = CloudRef(s.filtered().world_xy(pose or Pose()), point_to_line=True)
+    ref.pose_source = source or "origine"   # "origine" : pose inconnue, scan placé en (0, 0, 0)
+    ref.pose = pose or Pose()
+    return ref

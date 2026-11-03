@@ -7,3 +7,8 @@ plot_app_version_3.py, scan_version_1.py, gridmap_version_1.py, main_version_1.p
 
 main_version_2.py   : carto/__main__.py avant l ajout de « evaluer » et « localiser » (TP Jour 2)
 README_version_1.md : README avant la section TP Jour 2
+scan_version_2.py       : carto/scan.py avant le lecteur RobotControl (distance_m)
+evaluation_version_1.py : carto/evaluation.py avant poses mesurées, convergence, IC de Wilson
+plot_app_version_4.py   : carto/plot_app.py avant la fenêtre « Localiser » (TP 2)
+main_version_3.py       : carto/__main__.py avant evaluer --mesurees, localiser --ref-pose, simulate --tp2
+simulate_version_1.py   : carto/simulate.py avant simulate_tp2_session
