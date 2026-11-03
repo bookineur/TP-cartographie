@@ -127,6 +127,38 @@ python -m carto vector data/sim --poses data/sim/poses_truth.json --out out/vect
 python -m pytest
 ```
 
+## TP Jour 2 : localisation par scan matching
+
+Retrouver la pose (x, y, θ) d'un scan en le superposant à une **référence** (`carto/localisation.py`) :
+
+| référence | ce qu'on mesure pour chaque point du scan |
+|---|---|
+| **grid map** (`GridRef`) | distance à la cellule occupée la plus proche, lue dans un champ de distance précalculé (interpolation bilinéaire → valeur et gradient) |
+| **carte vectorielle** (`VectorRef`) | distance exacte au segment le plus proche |
+| **scan de référence** (`CloudRef`) | distance au point le plus proche (point-à-point) ou à la droite locale du scan (point-à-droite) |
+
+Les méthodes sont écrites une seule fois et marchent sur les trois références :
+
+| méthode | famille (énoncé) | principe |
+|---|---|---|
+| `brute force` | recherche exhaustive | toutes les poses d'une grille ±0,5 m, ±15° (pas 4 cm, 1,5°) |
+| `multi-résolution` | multi-résolution | même recherche à pas 10 cm / 4° avec un score flou, puis 3 cm / 1°, puis 1 cm / 0,25° autour du meilleur |
+| `Gauss-Newton` | descente de gradient | Gauss-Newton amorti (Levenberg-Marquardt) sur Σ w·d², poids robustes de Cauchy |
+| `ICP` | calcul direct itéré | appariement au plus proche, puis rotation + translation exactes par SVD, jusqu'à convergence |
+| `particules` | probabiliste | 400 poses tirées autour de la pose initiale, pondérées par la vraisemblance, rééchantillonnées en resserrant le bruit |
+| `direct (murs)` | calcul direct (carte vectorielle) | θ par l'orientation des murs (modulo 90°), puis (x, y) par UN calcul de moindres carrés linéaires |
+| `direct (moments)` | calcul direct (entre scans) | centre de gravité + axe principal d'inertie des deux nuages |
+
+```bash
+python -m carto evaluer --reel data/salle_2026-11-02_18h31     # évaluation chiffrée complète -> resultats/localisation/version_N/
+python -m carto evaluer --rapide                                # essai rapide (simulation seule)
+python -m carto localiser data/sim/pos1_000.csv --ref resultats/.../gridmap.npz --init 1.6 1.4 15
+```
+
+`localiser` accepte une grid map (`gridmap.npz`), une carte vectorielle (`carte_vectorielle.txt` ou `vector_map.txt` du MapTool) ou un scan de référence (CSV, placé à la position écrite dans le fichier s'il vient du MapTool).
+
+L'évaluation (`carto/evaluation.py`) suit l'énoncé : mêmes scans et mêmes poses initiales pour toutes les méthodes, erreur de position (m), erreur angulaire (°), temps, taux de réussite (< 5 cm et < 2°), cinq niveaux d'erreur initiale (de 5 cm / 2° à 50 cm / 20°), poses connues en simulation, et incertitude des poses de référence sur les scans réels. Le rapport `synthese.md` de chaque version contient les tableaux, les figures et le protocole.
+
 ---
 
 ## 1. Extraction des données lidar
@@ -351,7 +383,7 @@ Chaque segment garde `n_obs`, le nombre d'observations qui l'ont formé. `confir
 
 ## Validation
 
-- `pytest` : 32 tests. Ils couvrent :
+- `pytest` : 57 tests (dont 19 pour la localisation : chaque méthode sur chaque référence, distances exactes, calculs directs). Ils couvrent :
   - le paquet d'exemple de la doc LD06 (§3.3) : CRC = 0x50, vitesse 2152 °/s, angles de 324,27° à 334,70°, mesures 224 mm et 220 mm ;
   - la resynchronisation après un CRC faux et un paquet coupé entre deux lectures ;
   - le passage 360°→0° ;
