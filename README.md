@@ -52,7 +52,11 @@ python -m carto plot
      Un fichier CSV ne peut pas contenir d'image : pour voir la carte dans Excel, il faut ce classeur ;
    - **Tableau CSV** de tous les points : scan, n° de point, angle, distance, intensité, x et y dans le repère du lidar, pose, x et y dans le repère de la carte. Le séparateur est « ; » et la virgule est décimale, pour ouvrir le fichier directement dans Excel en français ;
    - **Tout exporter** : l'image, le tableau et un `resume.md` (tableau des scans avec points, part de points valides, distances min/max et pose).
-6. **Assemblage à la main** : sélectionner un scan dans la liste, puis cocher **« 🖐 Déplacer à la souris »**. Glisser déplace le scan, la molette le tourne autour de la position du lidar (Maj : 0,1°). La pose est mise à jour dans les champs et dans `poses.json`. Une fois le scan posé à peu près, **« Recaler sur les autres scans »** termine l'alignement au centimètre.
+6. **Assemblage à la main** : sélectionner un scan dans la liste, puis cocher **« 🖐 Déplacer / tourner à la souris »**.
+   - **Glisser** déplace le scan.
+   - **Clic droit glissé**, ou **Ctrl + glisser** au pavé tactile, le fait tourner autour de la position du lidar, de n'importe quel angle en un geste.
+   - La **molette** le tourne de 5° par cran (0,5° avec Maj).
+   - Les boutons **⟲ 90° / ⟲ 15° / ⟳ 15° / ⟳ 90°** donnent des rotations rapides. La pose est mise à jour dans les champs et dans `poses.json`. Une fois le scan posé à peu près, **« Recaler sur les autres scans »** termine l'alignement au centimètre.
 7. **Intensité** :
    - « Couleur = intensité » colore chaque point de 0 (violet) à 255 (jaune) ;
    - « Intensité min » masque les points plus faibles que le seuil, à l'écran et dans l'image exportée ;

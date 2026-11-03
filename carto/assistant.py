@@ -276,7 +276,7 @@ class CaptureAssistant:
         mouter.pack(fill="both", expand=True)
         self.fig = Figure(figsize=(9, 7), dpi=100 * self.scale, facecolor=C["card"])
         self.ax = self.fig.add_axes([0.06, 0.07, 0.92, 0.9])
-        self.canvas = FigureCanvasTkAgg(self.fig, master=mouter)
+        self.canvas = theme.tk_figure_canvas(self.fig, mouter)  # sans double mise à l'échelle (écran 125 %)
         tb_frame = tk.Frame(mouter, bg=C["card"])
         tb_frame.pack(side="bottom", fill="x")
         self.toolbar = NavigationToolbar2Tk(self.canvas, tb_frame, pack_toolbar=False)

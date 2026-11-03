@@ -268,7 +268,7 @@ class LidarPlot:
         self.console_btn = cbtn
         self.fig = Figure(dpi=100 * self.scale, facecolor=D["plot_bg"])
         self.ax = self.fig.add_axes([0.04, 0.045, 0.95, 0.94])
-        self.canvas = FigureCanvasTkAgg(self.fig, master=mframe)
+        self.canvas = theme.tk_figure_canvas(self.fig, mframe)  # sans double mise à l'échelle (écran 125 %)
         self.canvas.get_tk_widget().configure(bg=D["plot_bg"], highlightthickness=0)
         self.canvas.get_tk_widget().pack(fill="both", expand=True)
         for ev, cb in (("scroll_event", self._on_scroll), ("button_press_event", self._on_press),
@@ -306,12 +306,21 @@ class LidarPlot:
                        command=lambda k=k, s=step: self.nudge(k, s)).pack()
             ttk.Button(sp, text="−", style="Small.TButton", width=2,
                        command=lambda k=k, s=step: self.nudge(k, -s)).pack()
+        rot = ttk.Frame(f, style="Panel.TFrame")
+        rot.grid(row=3, column=0, columnspan=7, sticky="we", pady=(px(4), 0))
+        tk.Label(rot, text="Tourner :", bg=D["panel"], fg=D["muted"], font=(FONT, 8)).pack(side="left")
+        for txt, deg in (("⟲ 90°", 90), ("⟲ 15°", 15), ("⟳ 15°", -15), ("⟳ 90°", -90)):
+            ttk.Button(rot, text=txt, style="Small.TButton",
+                       command=lambda d=deg: self.rotate_selected(d)).pack(side="left", padx=px(2))
         self.move_mode = tk.BooleanVar(value=False)
-        ttk.Checkbutton(f, text="🖐 Déplacer à la souris  (glisser = déplacer, molette = tourner, Maj = fin)",
-                        variable=self.move_mode, command=self._move_mode_changed).grid(
-            row=3, column=0, columnspan=7, sticky="w", pady=(px(4), 0))
+        ttk.Checkbutton(f, text="🖐 Déplacer / tourner à la souris", variable=self.move_mode,
+                        command=self._move_mode_changed).grid(row=4, column=0, columnspan=7, sticky="w",
+                                                              pady=(px(4), 0))
+        tk.Label(f, text="glisser = déplacer · clic droit glissé (ou Ctrl + glisser) = tourner · molette = 5° "
+                         "(Maj : 0,5°)", bg=D["panel"], fg=D["muted"], font=(FONT, 8), wraplength=px(320),
+                 justify="left").grid(row=5, column=0, columnspan=7, sticky="w")
         b = ttk.Frame(f, style="Panel.TFrame")
-        b.grid(row=4, column=0, columnspan=7, sticky="we", pady=(px(4), 0))
+        b.grid(row=6, column=0, columnspan=7, sticky="we", pady=(px(4), 0))
         ttk.Button(b, text="⤧ Recaler sur les autres scans", command=self.refine_selected).pack(side="left")
         ttk.Button(b, text="✕ Supprimer", command=self.delete_selected).pack(side="right")
         self.pose_frame.pack_forget()
@@ -342,10 +351,21 @@ class LidarPlot:
 
     def _move_mode_changed(self):
         if self.move_mode.get():
-            self._msg("Déplacement à la souris : glissez le scan sélectionné sur les autres, molette pour le "
-                      "tourner (Maj = 0,1°). Décochez pour revenir au zoom / déplacement de la vue.", D["accent"])
+            self._msg("Glisser = déplacer le scan · clic droit glissé (ou Ctrl + glisser) = le tourner autour du "
+                      "lidar · molette = 5°. Décochez pour revenir au zoom / déplacement de la vue.", D["accent"])
         else:
             self._msg("")
+
+    def rotate_selected(self, deg):
+        """Tourne le scan sélectionné autour de la position du lidar (boutons ⟲ / ⟳)."""
+        if self.selected is None or self.selected >= len(self.captures):
+            return self._msg("Sélectionnez d'abord un scan dans la liste.", D["warn"])
+        c = self.captures[self.selected]
+        c["pose"] = Pose(c["pose"].x, c["pose"].y, c["pose"].theta + np.radians(deg))
+        self._sync_pose_fields(c)
+        self._draw_captures()
+        self._save_poses()
+        self._refresh_list()
 
     def _sync_pose_fields(self, c):
         for k, v in (("x", c["pose"].x), ("y", c["pose"].y), ("t", np.degrees(c["pose"].theta))):
@@ -950,7 +970,7 @@ class LidarPlot:
             return
         if self._moving():  # molette = tourner le scan sélectionné autour de la position du lidar
             c = self.captures[self.selected]
-            step = np.radians(0.1 if e.key == "shift" else 1.0) * (1 if e.button == "up" else -1)
+            step = np.radians(0.5 if e.key == "shift" else 5.0) * (1 if e.button == "up" else -1)
             c["pose"] = Pose(c["pose"].x, c["pose"].y, c["pose"].theta + step)
             self._sync_pose_fields(c)
             self._draw_captures()
@@ -968,16 +988,37 @@ class LidarPlot:
             return
         if e.dblclick:
             return self.fit_view()
-        if e.button == 1 and self._moving():
-            self._drag = (e.xdata, e.ydata)
-            self.canvas.get_tk_widget().configure(cursor="fleur")
-            return
+        if self._moving():
+            c = self.captures[self.selected]
+            if e.button == 3 or (e.button == 1 and e.key in ("control", "ctrl")):
+                # rotation : on « attrape » le scan et on le fait tourner autour de la position du lidar
+                p = c["pose"]
+                self._rot = (np.arctan2(e.ydata - p.y, e.xdata - p.x), p.theta)
+                self.canvas.get_tk_widget().configure(cursor="exchange")
+                return
+            if e.button == 1:
+                self._drag = (e.xdata, e.ydata)
+                self.canvas.get_tk_widget().configure(cursor="fleur")
+                return
         if e.button in (1, 2, 3):
             self._pan = (e.xdata, e.ydata)
             self.canvas.get_tk_widget().configure(cursor="fleur")
 
     def _on_motion(self, e):
         if e.inaxes is self.ax and e.xdata is not None:
+            if getattr(self, "_rot", None):  # rotation du scan sélectionné
+                c = self.captures[self.selected]
+                p = c["pose"]
+                ang0, th0 = self._rot
+                ang = np.arctan2(e.ydata - p.y, e.xdata - p.x)
+                if np.hypot(e.xdata - p.x, e.ydata - p.y) > 0.05:  # trop près du centre : angle instable
+                    c["pose"] = Pose(p.x, p.y, th0 + (ang - ang0))
+                    self._sync_pose_fields(c)
+                    now = time.time()
+                    if now - getattr(self, "_last_drag_draw", 0) > 0.04:
+                        self._last_drag_draw = now
+                        self._draw_captures()
+                return
             if getattr(self, "_drag", None):  # déplacement du scan sélectionné
                 c = self.captures[self.selected]
                 dx, dy = e.xdata - self._drag[0], e.ydata - self._drag[1]
@@ -1003,8 +1044,8 @@ class LidarPlot:
 
     def _on_release(self, e):
         self._pan = None
-        if getattr(self, "_drag", None):
-            self._drag = None
+        if getattr(self, "_drag", None) or getattr(self, "_rot", None):
+            self._drag = self._rot = None
             self._draw_captures()
             self._save_poses()
             self._refresh_list()

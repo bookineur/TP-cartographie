@@ -1,3 +1,5 @@
 ﻿Anciennes versions des fichiers modifies (rien n'est supprime).
 plot_app_version_1.py : Lidar Plot avant l'ajout de l'assemblage a la souris et de l'intensite (03/11/2026).
 Pour relancer une ancienne version : copier le fichier a la place de carto\plot_app.py.
+plot_app_version_2.py : Lidar Plot avec deplacement a la souris et intensite, rotation a la molette seulement (1 degre par cran) (03/11/2026).
+theme_version_1.py, assistant_version_1.py : avant la correction de l'echelle 125 % (carte rognee, souris decalee) (03/11/2026).

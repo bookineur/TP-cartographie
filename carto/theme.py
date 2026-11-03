@@ -24,6 +24,28 @@ OCC_CMAP = LinearSegmentedColormap.from_list(
     "occupation", [(0.0, C["free"]), (0.5, C["unknown"]), (1.0, C["wall"])])
 
 
+def tk_figure_canvas(figure, master):
+    """FigureCanvasTkAgg sans double mise à l'échelle.
+
+    Avec `enable_dpi_awareness()`, 1 pixel Tk = 1 pixel écran : la mise à l'échelle
+    Windows (125 %, 150 %…) est déjà prise en compte (dpi de la figure × échelle).
+    Matplotlib, lui, ré-applique ce facteur (device_pixel_ratio = 1,25) : la figure
+    devient plus grande que la zone (carte rognée en bas / à droite) et la position
+    de la souris ne correspond plus aux points affichés (rotation impossible).
+    On force donc un rapport de 1."""
+    from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
+    class _Canvas(FigureCanvasTkAgg):
+        def _update_device_pixel_ratio(self, event=None):
+            if self._set_device_pixel_ratio(1.0):
+                w, h = self.get_width_height(physical=True)
+                self._tkcanvas.configure(width=w, height=h)
+
+    canvas = _Canvas(figure, master=master)
+    canvas._update_device_pixel_ratio()
+    return canvas
+
+
 def enable_dpi_awareness():
     """Fenêtre nette sur les écrans à 125-150 % (sinon Windows l'agrandit en la floutant).
     À appeler AVANT de créer la fenêtre Tk."""
