@@ -1,0 +1,10 @@
+# Fichiers générés automatiquement par Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# État local de Lidar Plot (dernière session ouverte sur ce PC)
+data/.derniere_session
+
+# Fichiers temporaires de Word / Excel ouverts
+~$*
