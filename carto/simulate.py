@@ -114,3 +114,46 @@ def simulate_tp2_session(out_dir="data/repetition_tp2", n_marks=8, repeats=2, se
     save_poses(out / "poses.json", measured)
     save_poses(out / "verite.json", truth)
     return out
+
+
+# --------------------------------------------------------------------------- exercice d'assemblage
+# Salle 7 x 5 m : une porte dans le mur du bas, une armoire (0,6 x 1,6 m) contre le mur de gauche et
+# une table (1,4 x 0,8 m) au milieu. Sert à s'entraîner à l'assemblage avec une vérité cachée.
+ROOM_EXERCISE = [
+    ((0, 0), (3.0, 0)), ((3.9, 0), (7, 0)), ((7, 0), (7, 5)), ((7, 5), (0, 5)), ((0, 5), (0, 0)),
+    ((0, 1.6), (0.6, 1.6)), ((0.6, 1.6), (0.6, 3.2)), ((0.6, 3.2), (0, 3.2)),                      # armoire
+    ((3.2, 2.0), (4.6, 2.0)), ((4.6, 2.0), (4.6, 2.8)), ((4.6, 2.8), (3.2, 2.8)), ((3.2, 2.8), (3.2, 2.0)),  # table
+]
+EXERCISE_POSES = [Pose(1.6, 1.0, np.radians(0)), Pose(5.8, 1.0, np.radians(80)), Pose(6.0, 4.0, np.radians(200)),
+                  Pose(3.5, 4.2, np.radians(-120)), Pose(1.5, 4.2, np.radians(35)), Pose(3.8, 1.2, np.radians(150)),
+                  Pose(5.2, 3.0, np.radians(-20)), Pose(2.0, 2.5, np.radians(260))]
+
+
+def simulate_exercise(out_dir="data/exercice_assemblage", seed=3):
+    """8 scans de la salle d'exercice (positions inconnues de l'élève) + la correction dans `correction/`
+    (poses vraies, grid map et carte vectorielle de référence)."""
+    from carto.gridmap import build_grid
+    from carto.register import clean_scan
+    from carto.scan import Scan
+    rng = np.random.default_rng(seed)
+    out = Path(out_dir)
+    (out / "correction").mkdir(parents=True, exist_ok=True)
+    pairs = []
+    for k, pose in enumerate(EXERCISE_POSES, 1):
+        n = 450
+        ang = (np.arange(n) * 360.0 / n + rng.uniform(0, 0.8)) % 360.0
+        r = raycast(pose, np.radians(ang), walls=ROOM_EXERCISE)
+        valid = r > 0
+        r = r + rng.normal(0, 0.03, n) * valid
+        r[rng.random(n) < 0.02] = 0.0
+        inten = np.where(r > 0, np.clip(rng.normal(200, 20, n) - 8 * r, 0, 255), 0)
+        save_scan_csv(out / f"scan{k}.csv", ang, r * 1000, inten, meta={"simulated": 1, "speed_dps": 3600})
+        pairs.append((clean_scan(Scan("s", np.radians(ang), r, inten)), pose))
+    (out / "correction" / "poses_vraies.json").write_text(
+        json.dumps({f"scan{k}": p.as_list_deg() for k, p in enumerate(EXERCISE_POSES, 1)}, indent=2), "utf-8")
+    grid = build_grid(pairs, resolution=0.05)
+    grid.save(out / "correction" / "gridmap_reference.npz")
+    (out / "correction" / "carte_vectorielle_reference.txt").write_text(
+        "# x1,y1,x2,y2 en mètres (salle d'exercice)\n"
+        + "".join(f"{a[0]},{a[1]},{b[0]},{b[1]}\n" for a, b in ROOM_EXERCISE), "utf-8")
+    return out
