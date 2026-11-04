@@ -7,7 +7,7 @@
 //  les scans y sont enregistrés sur l'ordinateur et apparaissent aussi dans Lidar Lab.
 //  Sans PC, la page autonome de la v3 reste disponible.
 //
-//  Réseau : Robot-LiDAR      mot de passe : lidar2026      page : http://192.168.4.1
+//  Réseau : Robot-LiDAR      mot de passe temporaire unique affiché dans le moniteur série
 //
 //  Nouveauté de la v3 : la carte se construit automatiquement SUR LE TÉLÉPHONE.
 //    Chaque scan capturé est recalé sur les scans précédents puis ajouté à la grid map,
@@ -35,7 +35,11 @@
 
 // ---------------- Wi-Fi ----------------
 const char *AP_SSID = "Robot-LiDAR";
-const char *AP_PASS = "lidar2026";  // 8 caractères minimum
+String temporaryApPassword() {
+  char pass[9];
+  snprintf(pass, sizeof pass, "%08lX", (unsigned long)(ESP.getEfuseMac() & 0xFFFFFFFFULL));
+  return String(pass);
+}
 
 // ---------------- LiDAR ----------------
 #define RX_LIDAR      33
@@ -86,6 +90,7 @@ bool pcPresent() { return pcPort && millis() - pcSeenMs < 10000; }
 float targetL = 0, targetR = 0, curL = 0, curR = 0;
 unsigned long lastDriveMs = 0, lastRampUs = 0, turnEndMs = 0;
 bool turning = false;
+bool robotIsMoving() { return turning || fabsf(targetL) > 2.0f || fabsf(targetR) > 2.0f || fabsf(curL) > 2.0f || fabsf(curR) > 2.0f; }
 
 // ---------------- Copie du dernier tour complet ----------------
 struct ScanPoint {
@@ -97,6 +102,7 @@ ScanPoint snap[LD06_MAX_PTS_SCAN];
 uint16_t snapCount = 0;
 uint32_t snapId = 0;
 uint16_t snapSpeed = 0;
+bool snapMoving = false;
 
 // ============================================================================
 //  Moteurs
@@ -497,7 +503,7 @@ void handleLidar() {
 void handleScan() {
   String out;
   out.reserve(snapCount * 16 + 160);
-  out += "# robot_wifi id=" + String(snapId) + " hz=" + String(snapSpeed / 360.0f, 1) + " pts=" + String(snapCount) + " pwm=" + String(lidarPct) + "\n";
+  out += "# robot_wifi id=" + String(snapId) + " hz=" + String(snapSpeed / 360.0f, 1) + " pts=" + String(snapCount) + " pwm=" + String(lidarPct) + " moving=" + String(snapMoving ? 1 : 0) + "\n";
   out += "angle_deg,distance_mm,intensity\n";
   char line[32];
   for (uint16_t i = 0; i < snapCount; i++) {
@@ -529,7 +535,8 @@ void setup() {
   ld06.disableFiltering();
 
   WiFi.mode(WIFI_AP);
-  WiFi.softAP(AP_SSID, AP_PASS);
+  String apPass = temporaryApPassword();
+  WiFi.softAP(AP_SSID, apPass.c_str());
   WiFi.setSleep(false);
 
   server.on("/", handlePage);
@@ -552,6 +559,8 @@ void setup() {
   Serial.print(AP_SSID);
   Serial.print(" » prêt. Ouvre http://");
   Serial.println(WiFi.softAPIP());
+  Serial.print("Mot de passe AP temporaire : ");
+  Serial.println(apPass);
 }
 
 void loop() {
@@ -565,6 +574,7 @@ void loop() {
     }
     snapCount = n;
     snapSpeed = ld06.getSpeed();
+    snapMoving = robotIsMoving();
     snapId++;
   }
 

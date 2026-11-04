@@ -1,7 +1,7 @@
 // ============================================================================
 //  ESP32 + LD06 : pilotage du robot par Wi-Fi depuis un téléphone — version 2
 //
-//  Réseau : Robot-LiDAR      mot de passe : lidar2026      page : http://192.168.4.1
+//  Réseau : Robot-LiDAR      mot de passe temporaire unique affiché dans le moniteur série
 //
 //  Nouveautés par rapport à la v1 :
 //    - démarrage / arrêt progressifs (rampe dans l'ESP32) ; le bouton STOP reste immédiat
@@ -22,7 +22,11 @@
 
 // ---------------- Wi-Fi ----------------
 const char *AP_SSID = "Robot-LiDAR";
-const char *AP_PASS = "lidar2026";  // 8 caractères minimum
+String temporaryApPassword() {
+  char pass[9];
+  snprintf(pass, sizeof pass, "%08lX", (unsigned long)(ESP.getEfuseMac() & 0xFFFFFFFFULL));
+  return String(pass);
+}
 
 // ---------------- LiDAR ----------------
 #define RX_LIDAR      33
@@ -419,7 +423,10 @@ void setup() {
   ld06.disableFiltering();
 
   WiFi.mode(WIFI_AP);
-  WiFi.softAP(AP_SSID, AP_PASS);
+  String apPass = temporaryApPassword();
+  WiFi.softAP(AP_SSID, apPass.c_str());
+  Serial.print("Mot de passe AP temporaire : ");
+  Serial.println(apPass);
   WiFi.setSleep(false);
 
   server.on("/", handlePage);
