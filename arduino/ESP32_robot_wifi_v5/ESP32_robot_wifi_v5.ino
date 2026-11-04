@@ -60,12 +60,7 @@ const char *MDNS_NAME = "robot-lidar";  // http://robot-lidar.local
 bool stationMode = false;               // true = connecté à ton Wi-Fi ; false = point d'accès Robot-LiDAR
 
 // Réseau créé par le robot si ton Wi-Fi n'est pas disponible
-const char *AP_SSID = "Robot-LiDAR";
-String temporaryApPassword() {
-  char pass[9];
-  snprintf(pass, sizeof pass, "%08lX", (unsigned long)(ESP.getEfuseMac() & 0xFFFFFFFFULL));
-  return String(pass);
-}
+const char *AP_SSID = "Robot-LiDAR";  // mot de passe : voir temporaryApPassword() plus bas
 
 // ---------------- LiDAR ----------------
 #define RX_LIDAR      33
@@ -199,6 +194,15 @@ void initWheels() {
 // ============================================================================
 //  Wi-Fi : d'abord ton réseau, sinon point d'accès Robot-LiDAR
 // ============================================================================
+// Mot de passe du réseau de secours, propre à chaque carte (affiché dans le moniteur série).
+// Placée ici et pas en haut du fichier : l'IDE Arduino insère les déclarations automatiques de
+// fonctions avant la PREMIÈRE fonction ; plus haut, elles arrivaient avant « struct Wheel » (erreur de compilation).
+String temporaryApPassword() {
+  char pass[9];
+  snprintf(pass, sizeof pass, "%08lX", (unsigned long)(ESP.getEfuseMac() & 0xFFFFFFFFULL));
+  return String(pass);
+}
+
 void startWifi() {
   if (strlen(HOME_SSID)) {
     WiFi.setHostname(MDNS_NAME);
@@ -580,6 +584,9 @@ void handleScan() {
     snprintf(line, sizeof line, "%.2f,%u,%u\n", snap[i].angle100 / 100.0f, snap[i].distance, snap[i].intensity);
     out += line;
   }
+  // Envoi immédiat des paquets TCP (algorithme de Nagle désactivé) : sans cela, un scan de ~6 ko
+  // pouvait mettre 1 à 3 s à arriver via un partage de connexion, alors qu'une petite réponse passe en 30 ms.
+  server.client().setNoDelay(true);
   server.sendHeader("Access-Control-Allow-Origin", "*");
   server.sendHeader("Cache-Control", "no-store");
   server.send(200, "text/csv", out);
