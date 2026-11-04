@@ -8,3 +8,6 @@ data/.derniere_session
 
 # Fichiers temporaires de Word / Excel ouverts
 ~$*
+
+# Identifiants Wi-Fi personnels du robot (ne jamais les committer)
+arduino/**/wifi_secrets.h
