@@ -112,6 +112,22 @@ def overlap_points(a: np.ndarray, b: np.ndarray, tol=0.10) -> float:
     return hit / len(b)
 
 
+_ANGLE_BATCH = 12  # angles traités ensemble (mémoire : 12 grilles à la fois)
+
+
+def _fast_len(n: int) -> int:
+    """Plus petite taille >= n de la forme 2^a·3^b·5^c (taille où la FFT est rapide)."""
+    m = n
+    while True:
+        k = m
+        for p in (2, 3, 5):
+            while k % p == 0:
+                k //= p
+        if k == 1:
+            return m
+        m += 1
+
+
 def match_global(a_pts: np.ndarray, b_local: np.ndarray, res=0.10, step_deg=2.0, max_pts=400) -> Match:
     """Pose de B (points dans son repère) qui superpose B sur A (points dans le repère de A)."""
     rng = np.random.default_rng(0)
@@ -119,19 +135,29 @@ def match_global(a_pts: np.ndarray, b_local: np.ndarray, res=0.10, step_deg=2.0,
     reach = np.abs(b).max() + 0.5
     field, lo = _field(a_pts, res, margin=reach)
     H, W = field.shape
-    F = np.fft.rfft2(field)
+    # grille complétée de zéros jusqu'à une taille rapide pour la FFT (produit de 2, 3, 5) :
+    # le pic de corrélation est cherché dans la zone d'origine H x W, donc le résultat ne change pas
+    Hf, Wf = _fast_len(H), _fast_len(W)
+    padded = np.zeros((Hf, Wf))
+    padded[:H, :W] = field
+    F = np.fft.rfft2(padded)
     results = []
-    for th in np.radians(np.arange(0, 360, step_deg)):
-        c, s = np.cos(th), np.sin(th)
-        rb = b @ np.array([[c, s], [-s, c]])
-        # image de B centrée sur l'origine de la grille (indices modulo = translation circulaire)
-        img = np.zeros((H, W))
-        ci = np.round(rb / res).astype(int)
-        np.add.at(img, (ci[:, 1] % H, ci[:, 0] % W), 1.0)
-        corr = np.fft.irfft2(F * np.conj(np.fft.rfft2(img)), s=(H, W))
-        k = int(np.argmax(corr))
-        iy, ix = divmod(k, W)
-        results.append((corr.flat[k] / len(b), th, ix, iy))
+    thetas = np.radians(np.arange(0, 360, step_deg))
+    for start in range(0, len(thetas), _ANGLE_BATCH):
+        ths = thetas[start:start + _ANGLE_BATCH]
+        # images de B tourné, une par angle, calculées et transformées ensemble
+        imgs = np.zeros((len(ths), Hf, Wf))
+        for n, th in enumerate(ths):
+            c, s = np.cos(th), np.sin(th)
+            rb = b @ np.array([[c, s], [-s, c]])
+            # image de B centrée sur l'origine de la grille (indices modulo = translation circulaire)
+            ci = np.round(rb / res).astype(int)
+            np.add.at(imgs[n], (ci[:, 1] % Hf, ci[:, 0] % Wf), 1.0)
+        corr = np.fft.irfft2(F * np.conj(np.fft.rfft2(imgs)), s=(Hf, Wf))[:, :H, :W]
+        for n, th in enumerate(ths):
+            k = int(np.argmax(corr[n]))
+            iy, ix = divmod(k, W)
+            results.append((corr[n].flat[k] / len(b), th, ix, iy))
     results.sort(key=lambda r: -r[0])
     best = results[0]
     # translation : un point de B à l'origine tombe dans la cellule (ix, iy) de la grille

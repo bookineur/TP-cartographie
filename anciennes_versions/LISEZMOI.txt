@@ -12,3 +12,4 @@ evaluation_version_1.py : carto/evaluation.py avant poses mesurées, convergence
 plot_app_version_4.py   : carto/plot_app.py avant la fenêtre « Localiser » (TP 2)
 main_version_3.py       : carto/__main__.py avant evaluer --mesurees, localiser --ref-pose, simulate --tp2
 simulate_version_1.py   : carto/simulate.py avant simulate_tp2_session
+register_version_1.py : recalage global avant l'accélération (FFT angle par angle, grilles de taille quelconque).
