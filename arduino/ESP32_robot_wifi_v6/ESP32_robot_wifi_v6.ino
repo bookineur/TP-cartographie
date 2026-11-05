@@ -230,7 +230,25 @@ void startWifi() {
     WiFi.setHostname(MDNS_NAME);
     WiFi.mode(WIFI_STA);
     WiFi.setTxPower(WIFI_POWER_19_5dBm);  // puissance d'émission maximale
-    WiFi.begin(HOME_SSID, HOME_PASS);
+    // Diagnostic : liste des Wi-Fi que le robot voit vraiment (nom exact, signal, canal).
+    // Si ton Wi-Fi est dans la liste, connexion ciblée sur son canal et son adresse (BSSID) :
+    // certains partages de connexion iPhone ne sont pas trouvés par la recherche normale de l'ESP32.
+    Serial.println("Recherche des réseaux Wi-Fi visibles…");
+    int n = WiFi.scanNetworks(false, true), best = -1;
+    for (int i = 0; i < n; i++) {
+      Serial.printf("  « %s »  signal %d dBm  canal %d%s\n", WiFi.SSID(i).c_str(), WiFi.RSSI(i), WiFi.channel(i),
+                    WiFi.encryptionType(i) == WIFI_AUTH_OPEN ? "  (ouvert)" : "");
+      if (WiFi.SSID(i) == HOME_SSID && (best < 0 || WiFi.RSSI(i) > WiFi.RSSI(best))) best = i;
+    }
+    if (n <= 0) Serial.println("  aucun réseau vu (antenne ? trop loin ?)");
+    if (best >= 0) {
+      Serial.printf("« %s » trouvé sur le canal %d : connexion ciblée.\n", HOME_SSID, WiFi.channel(best));
+      WiFi.begin(HOME_SSID, HOME_PASS, WiFi.channel(best), WiFi.BSSID(best));
+    } else {
+      Serial.printf("« %s » n'est PAS dans la liste : vérifie le nom exact (majuscules, espaces) et garde l'écran Partage de connexion ouvert.\n", HOME_SSID);
+      WiFi.begin(HOME_SSID, HOME_PASS);
+    }
+    WiFi.scanDelete();
     Serial.print("Connexion au Wi-Fi « ");
     Serial.print(HOME_SSID);
     Serial.print(" »");
