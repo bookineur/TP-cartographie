@@ -1,0 +1,569 @@
+{
+  "app": "Lidar Lab robot Wi-Fi",
+  "name": "seance_2026-11-04_17h42m59",
+  "settings": {
+    "gres": 0.05,
+    "rmin": 0.05,
+    "rmax": 12,
+    "imin": 0,
+    "ovl": 35,
+    "tfilt": true
+  },
+  "scans": [
+    {
+      "name": "scan_01_19h20m09.csv",
+      "pose": [
+        0,
+        0,
+        0
+      ],
+      "reg": true,
+      "anchor": true,
+      "note": "origine de la carte",
+      "points": 316,
+      "capturedAt": "2026-11-04T18:20:09.076Z",
+      "retryable": false
+    },
+    {
+      "name": "scan_02_19h24m06.csv",
+      "pose": [
+        0.465,
+        1.54,
+        25.5
+      ],
+      "reg": true,
+      "anchor": false,
+      "note": "recouvrement 73 % · écart 5.5 cm",
+      "points": 318,
+      "capturedAt": "2026-11-04T18:24:06.803Z",
+      "retryable": false
+    },
+    {
+      "name": "scan_03_19h24m30.csv",
+      "pose": [
+        0.49,
+        1.565,
+        26
+      ],
+      "reg": true,
+      "anchor": false,
+      "note": "recouvrement 89 % · écart 3.6 cm",
+      "points": 318,
+      "capturedAt": "2026-11-04T18:24:30.022Z",
+      "retryable": false
+    },
+    {
+      "name": "scan_04_19h24m33.csv",
+      "pose": [
+        0.865,
+        1.865,
+        22.5
+      ],
+      "reg": true,
+      "anchor": false,
+      "note": "recouvrement 89 % · écart 3.3 cm",
+      "points": 318,
+      "capturedAt": "2026-11-04T18:24:33.257Z",
+      "retryable": false
+    },
+    {
+      "name": "scan_05_19h25m06.csv",
+      "pose": [
+        0.565,
+        2.065,
+        87.5
+      ],
+      "reg": true,
+      "anchor": false,
+      "note": "recouvrement 93 % · écart 3.1 cm",
+      "points": 317,
+      "capturedAt": "2026-11-04T18:25:06.324Z",
+      "retryable": false
+    },
+    {
+      "name": "scan_06_19h25m27.csv",
+      "pose": [
+        1.14,
+        2.24,
+        88
+      ],
+      "reg": true,
+      "anchor": false,
+      "note": "recouvrement 87 % · écart 3.1 cm",
+      "points": 318,
+      "capturedAt": "2026-11-04T18:25:27.314Z",
+      "retryable": false
+    },
+    {
+      "name": "scan_07_19h25m53.csv",
+      "pose": [
+        0.265,
+        2.99,
+        93.5
+      ],
+      "reg": true,
+      "anchor": false,
+      "note": "recouvrement 94 % · écart 3.5 cm",
+      "points": 319,
+      "capturedAt": "2026-11-04T18:25:53.685Z",
+      "retryable": false
+    },
+    {
+      "name": "scan_08_19h26m00.csv",
+      "pose": [
+        0.215,
+        3.14,
+        104.5
+      ],
+      "reg": true,
+      "anchor": false,
+      "note": "recouvrement 93 % · écart 2.4 cm",
+      "points": 318,
+      "capturedAt": "2026-11-04T18:26:00.135Z",
+      "retryable": false
+    },
+    {
+      "name": "scan_09_19h26m04.csv",
+      "pose": [
+        0,
+        3.5,
+        108
+      ],
+      "reg": true,
+      "anchor": false,
+      "note": "recouvrement 85 % · écart 3.4 cm",
+      "points": 317,
+      "capturedAt": "2026-11-04T18:26:04.074Z",
+      "retryable": false
+    },
+    {
+      "name": "scan_10_19h26m07.csv",
+      "pose": [
+        -0.035,
+        3.54,
+        114
+      ],
+      "reg": true,
+      "anchor": false,
+      "note": "recouvrement 97 % · écart 2.4 cm",
+      "points": 317,
+      "capturedAt": "2026-11-04T18:26:07.350Z",
+      "retryable": false
+    },
+    {
+      "name": "scan_11_19h26m11.csv",
+      "pose": [
+        -0.035,
+        3.565,
+        84.5
+      ],
+      "reg": true,
+      "anchor": false,
+      "note": "recouvrement 97 % · écart 1.7 cm",
+      "points": 318,
+      "capturedAt": "2026-11-04T18:26:11.143Z",
+      "retryable": false
+    },
+    {
+      "name": "scan_12_19h26m14.csv",
+      "pose": [
+        -0.06,
+        3.915,
+        87
+      ],
+      "reg": true,
+      "anchor": false,
+      "note": "recouvrement 90 % · écart 2.1 cm",
+      "points": 317,
+      "capturedAt": "2026-11-04T18:26:14.366Z",
+      "retryable": false
+    },
+    {
+      "name": "scan_13_19h26m17.csv",
+      "pose": [
+        -0.185,
+        4.315,
+        98
+      ],
+      "reg": true,
+      "anchor": false,
+      "note": "recouvrement 93 % · écart 2.5 cm",
+      "points": 317,
+      "capturedAt": "2026-11-04T18:26:17.981Z",
+      "retryable": false
+    },
+    {
+      "name": "scan_14_19h26m23.csv",
+      "pose": [
+        -0.185,
+        4.34,
+        39
+      ],
+      "reg": true,
+      "anchor": false,
+      "note": "recouvrement 98 % · écart 2.4 cm",
+      "points": 318,
+      "capturedAt": "2026-11-04T18:26:23.326Z",
+      "retryable": false
+    },
+    {
+      "name": "scan_15_19h26m26.csv",
+      "pose": [
+        -0.21,
+        4.34,
+        58
+      ],
+      "reg": true,
+      "anchor": false,
+      "note": "recouvrement 100 % · écart 2.2 cm",
+      "points": 319,
+      "capturedAt": "2026-11-04T18:26:26.504Z",
+      "retryable": false
+    },
+    {
+      "name": "scan_16_19h26m29.csv",
+      "pose": [
+        -0.21,
+        4.34,
+        70
+      ],
+      "reg": true,
+      "anchor": false,
+      "note": "recouvrement 100 % · écart 2.0 cm",
+      "points": 317,
+      "capturedAt": "2026-11-04T18:26:29.471Z",
+      "retryable": false
+    },
+    {
+      "name": "scan_17_19h26m39.csv",
+      "pose": [
+        -0.21,
+        4.34,
+        70.5
+      ],
+      "reg": true,
+      "anchor": false,
+      "note": "recouvrement 98 % · écart 1.9 cm",
+      "points": 318,
+      "capturedAt": "2026-11-04T18:26:39.367Z",
+      "retryable": false
+    },
+    {
+      "name": "scan_18_19h26m57.csv",
+      "pose": [
+        0.1,
+        4.65,
+        0
+      ],
+      "reg": true,
+      "anchor": false,
+      "note": "recouvrement 96 % · écart 2.0 cm",
+      "points": 319,
+      "capturedAt": "2026-11-04T18:26:57.023Z",
+      "retryable": false
+    },
+    {
+      "name": "scan_19_19h27m13.csv",
+      "pose": [
+        0.54,
+        4.69,
+        3
+      ],
+      "reg": true,
+      "anchor": false,
+      "note": "recouvrement 92 % · écart 2.6 cm",
+      "points": 318,
+      "capturedAt": "2026-11-04T18:27:13.094Z",
+      "retryable": false
+    },
+    {
+      "name": "scan_20_19h27m40.csv",
+      "pose": [
+        1.79,
+        2.765,
+        6
+      ],
+      "reg": true,
+      "anchor": false,
+      "note": "recouvrement 88 % · écart 3.4 cm",
+      "points": 318,
+      "capturedAt": "2026-11-04T18:27:40.228Z",
+      "retryable": false
+    },
+    {
+      "name": "scan_21_19h28m03.csv",
+      "pose": [
+        2.19,
+        0.715,
+        2
+      ],
+      "reg": true,
+      "anchor": false,
+      "note": "recouvrement 86 % · écart 3.2 cm",
+      "points": 318,
+      "capturedAt": "2026-11-04T18:28:03.293Z",
+      "retryable": false
+    },
+    {
+      "name": "scan_22_19h28m07.csv",
+      "pose": [
+        2.19,
+        0.715,
+        1.5
+      ],
+      "reg": true,
+      "anchor": false,
+      "note": "recouvrement 90 % · écart 2.8 cm",
+      "points": 317,
+      "capturedAt": "2026-11-04T18:28:07.631Z",
+      "retryable": false
+    },
+    {
+      "name": "scan_23_19h28m11.csv",
+      "pose": [
+        2.19,
+        0.715,
+        1
+      ],
+      "reg": true,
+      "anchor": false,
+      "note": "recouvrement 89 % · écart 2.8 cm",
+      "points": 318,
+      "capturedAt": "2026-11-04T18:28:11.479Z",
+      "retryable": false
+    },
+    {
+      "name": "scan_24_19h28m15.csv",
+      "pose": [
+        2.415,
+        0.765,
+        11
+      ],
+      "reg": true,
+      "anchor": false,
+      "note": "recouvrement 93 % · écart 2.8 cm",
+      "points": 316,
+      "capturedAt": "2026-11-04T18:28:15.104Z",
+      "retryable": false
+    },
+    {
+      "name": "scan_25_19h28m18.csv",
+      "pose": [
+        2.415,
+        0.765,
+        10.5
+      ],
+      "reg": true,
+      "anchor": false,
+      "note": "recouvrement 92 % · écart 2.5 cm",
+      "points": 317,
+      "capturedAt": "2026-11-04T18:28:18.066Z",
+      "retryable": false
+    },
+    {
+      "name": "scan_26_19h28m46.csv",
+      "pose": [
+        3.59,
+        0.74,
+        12.5
+      ],
+      "reg": true,
+      "anchor": false,
+      "note": "recouvrement 86 % · écart 4.0 cm",
+      "points": 317,
+      "capturedAt": "2026-11-04T18:28:46.170Z",
+      "retryable": false
+    },
+    {
+      "name": "scan_27_19h29m36.csv",
+      "pose": [
+        0,
+        0,
+        0
+      ],
+      "reg": false,
+      "anchor": false,
+      "note": "refusé : plusieurs positions possibles",
+      "points": 321,
+      "capturedAt": "2026-11-04T18:29:36.290Z"
+    },
+    {
+      "name": "scan_28_19h30m00.csv",
+      "pose": [
+        4.865,
+        1.265,
+        3
+      ],
+      "reg": true,
+      "anchor": false,
+      "note": "recouvrement 53 % · écart 6.2 cm",
+      "points": 316,
+      "capturedAt": "2026-11-04T18:30:00.474Z",
+      "retryable": false
+    },
+    {
+      "name": "scan_29_19h30m16.csv",
+      "pose": [
+        0,
+        0,
+        0
+      ],
+      "reg": false,
+      "anchor": false,
+      "note": "refusé : plusieurs positions possibles",
+      "points": 317,
+      "capturedAt": "2026-11-04T18:30:16.335Z"
+    },
+    {
+      "name": "scan_30_19h30m52.csv",
+      "pose": [
+        0,
+        0,
+        0
+      ],
+      "reg": false,
+      "anchor": false,
+      "note": "refusé : plusieurs positions possibles",
+      "points": 317,
+      "capturedAt": "2026-11-04T18:30:52.518Z"
+    },
+    {
+      "name": "scan_31_19h31m12.csv",
+      "pose": [
+        0,
+        0,
+        0
+      ],
+      "reg": false,
+      "anchor": false,
+      "note": "refusé : plusieurs positions possibles",
+      "points": 315,
+      "capturedAt": "2026-11-04T18:31:12.391Z"
+    },
+    {
+      "name": "scan_32_19h31m28.csv",
+      "pose": [
+        0,
+        0,
+        0
+      ],
+      "reg": false,
+      "anchor": false,
+      "note": "refusé : plusieurs positions possibles",
+      "points": 314,
+      "capturedAt": "2026-11-04T18:31:28.348Z"
+    },
+    {
+      "name": "scan_33_19h31m56.csv",
+      "pose": [
+        4.99,
+        6.19,
+        -176
+      ],
+      "reg": true,
+      "anchor": false,
+      "note": "recouvrement 46 % · écart 5.6 cm",
+      "points": 316,
+      "capturedAt": "2026-11-04T18:31:56.297Z",
+      "retryable": false
+    },
+    {
+      "name": "scan_34_19h32m16.csv",
+      "pose": [
+        3.665,
+        6.515,
+        -176.5
+      ],
+      "reg": true,
+      "anchor": false,
+      "note": "recouvrement 67 % · écart 5.3 cm",
+      "points": 315,
+      "capturedAt": "2026-11-04T18:32:16.006Z",
+      "retryable": false
+    },
+    {
+      "name": "scan_35_19h32m34.csv",
+      "pose": [
+        3.14,
+        7.265,
+        91.5
+      ],
+      "reg": true,
+      "anchor": false,
+      "note": "recouvrement 70 % · écart 4.8 cm",
+      "points": 316,
+      "capturedAt": "2026-11-04T18:32:34.891Z",
+      "retryable": false
+    },
+    {
+      "name": "scan_36_19h32m52.csv",
+      "pose": [
+        3.365,
+        8.315,
+        96
+      ],
+      "reg": true,
+      "anchor": false,
+      "note": "recouvrement 66 % · écart 5.2 cm",
+      "points": 316,
+      "capturedAt": "2026-11-04T18:32:52.173Z",
+      "retryable": false
+    },
+    {
+      "name": "scan_37_19h33m40.csv",
+      "pose": [
+        3.565,
+        9.09,
+        103
+      ],
+      "reg": true,
+      "anchor": false,
+      "note": "recouvrement 76 % · écart 4.6 cm",
+      "points": 316,
+      "capturedAt": "2026-11-04T18:33:40.836Z",
+      "retryable": false
+    },
+    {
+      "name": "scan_38_19h33m54.csv",
+      "pose": [
+        3.59,
+        9.99,
+        92
+      ],
+      "reg": true,
+      "anchor": false,
+      "note": "recouvrement 61 % · écart 4.2 cm",
+      "points": 317,
+      "capturedAt": "2026-11-04T18:33:54.276Z",
+      "retryable": false
+    },
+    {
+      "name": "scan_39_19h34m10.csv",
+      "pose": [
+        3.665,
+        10.89,
+        98
+      ],
+      "reg": true,
+      "anchor": false,
+      "note": "recouvrement 52 % · écart 6.0 cm",
+      "points": 317,
+      "capturedAt": "2026-11-04T18:34:10.159Z",
+      "retryable": false
+    },
+    {
+      "name": "scan_40_19h35m03.csv",
+      "pose": [
+        3.665,
+        10.89,
+        98.5
+      ],
+      "reg": true,
+      "anchor": false,
+      "note": "recouvrement 71 % · écart 4.2 cm",
+      "points": 318,
+      "capturedAt": "2026-11-04T18:35:03.413Z",
+      "retryable": false
+    }
+  ]
+}

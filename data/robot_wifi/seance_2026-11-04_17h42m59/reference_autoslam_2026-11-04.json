@@ -1,0 +1,475 @@
+{
+ "source": "Auto-SLAM de Lidar Lab (serveur_robot), séance du 04/11/2026, poses enregistrées dans seance.json",
+ "statut": "référence de COHÉRENCE, pas vérité terrain : poses calculées par scan matching, aucune mesure au sol",
+ "unites": "[x_m, y_m, theta_deg], repère = premier scan accepté (scan_01_19h20m09)",
+ "reglages": {
+  "gres": 0.05,
+  "rmin": 0.05,
+  "rmax": 12,
+  "imin": 0,
+  "ovl": 35,
+  "tfilt": true
+ },
+ "scans": [
+  {
+   "nom": "scan_01_19h20m09.csv",
+   "ordre": 1,
+   "recale": true,
+   "pose": [
+    0,
+    0,
+    0
+   ],
+   "note": "origine de la carte",
+   "capture": "2026-11-04T18:20:09.076Z"
+  },
+  {
+   "nom": "scan_02_19h24m06.csv",
+   "ordre": 2,
+   "recale": true,
+   "pose": [
+    0.465,
+    1.54,
+    25.5
+   ],
+   "note": "recouvrement 73 % · écart 5.5 cm",
+   "capture": "2026-11-04T18:24:06.803Z"
+  },
+  {
+   "nom": "scan_03_19h24m30.csv",
+   "ordre": 3,
+   "recale": true,
+   "pose": [
+    0.49,
+    1.565,
+    26
+   ],
+   "note": "recouvrement 89 % · écart 3.6 cm",
+   "capture": "2026-11-04T18:24:30.022Z"
+  },
+  {
+   "nom": "scan_04_19h24m33.csv",
+   "ordre": 4,
+   "recale": true,
+   "pose": [
+    0.865,
+    1.865,
+    22.5
+   ],
+   "note": "recouvrement 89 % · écart 3.3 cm",
+   "capture": "2026-11-04T18:24:33.257Z"
+  },
+  {
+   "nom": "scan_05_19h25m06.csv",
+   "ordre": 5,
+   "recale": true,
+   "pose": [
+    0.565,
+    2.065,
+    87.5
+   ],
+   "note": "recouvrement 93 % · écart 3.1 cm",
+   "capture": "2026-11-04T18:25:06.324Z"
+  },
+  {
+   "nom": "scan_06_19h25m27.csv",
+   "ordre": 6,
+   "recale": true,
+   "pose": [
+    1.14,
+    2.24,
+    88
+   ],
+   "note": "recouvrement 87 % · écart 3.1 cm",
+   "capture": "2026-11-04T18:25:27.314Z"
+  },
+  {
+   "nom": "scan_07_19h25m53.csv",
+   "ordre": 7,
+   "recale": true,
+   "pose": [
+    0.265,
+    2.99,
+    93.5
+   ],
+   "note": "recouvrement 94 % · écart 3.5 cm",
+   "capture": "2026-11-04T18:25:53.685Z"
+  },
+  {
+   "nom": "scan_08_19h26m00.csv",
+   "ordre": 8,
+   "recale": true,
+   "pose": [
+    0.215,
+    3.14,
+    104.5
+   ],
+   "note": "recouvrement 93 % · écart 2.4 cm",
+   "capture": "2026-11-04T18:26:00.135Z"
+  },
+  {
+   "nom": "scan_09_19h26m04.csv",
+   "ordre": 9,
+   "recale": true,
+   "pose": [
+    0,
+    3.5,
+    108
+   ],
+   "note": "recouvrement 85 % · écart 3.4 cm",
+   "capture": "2026-11-04T18:26:04.074Z"
+  },
+  {
+   "nom": "scan_10_19h26m07.csv",
+   "ordre": 10,
+   "recale": true,
+   "pose": [
+    -0.035,
+    3.54,
+    114
+   ],
+   "note": "recouvrement 97 % · écart 2.4 cm",
+   "capture": "2026-11-04T18:26:07.350Z"
+  },
+  {
+   "nom": "scan_11_19h26m11.csv",
+   "ordre": 11,
+   "recale": true,
+   "pose": [
+    -0.035,
+    3.565,
+    84.5
+   ],
+   "note": "recouvrement 97 % · écart 1.7 cm",
+   "capture": "2026-11-04T18:26:11.143Z"
+  },
+  {
+   "nom": "scan_12_19h26m14.csv",
+   "ordre": 12,
+   "recale": true,
+   "pose": [
+    -0.06,
+    3.915,
+    87
+   ],
+   "note": "recouvrement 90 % · écart 2.1 cm",
+   "capture": "2026-11-04T18:26:14.366Z"
+  },
+  {
+   "nom": "scan_13_19h26m17.csv",
+   "ordre": 13,
+   "recale": true,
+   "pose": [
+    -0.185,
+    4.315,
+    98
+   ],
+   "note": "recouvrement 93 % · écart 2.5 cm",
+   "capture": "2026-11-04T18:26:17.981Z"
+  },
+  {
+   "nom": "scan_14_19h26m23.csv",
+   "ordre": 14,
+   "recale": true,
+   "pose": [
+    -0.185,
+    4.34,
+    39
+   ],
+   "note": "recouvrement 98 % · écart 2.4 cm",
+   "capture": "2026-11-04T18:26:23.326Z"
+  },
+  {
+   "nom": "scan_15_19h26m26.csv",
+   "ordre": 15,
+   "recale": true,
+   "pose": [
+    -0.21,
+    4.34,
+    58
+   ],
+   "note": "recouvrement 100 % · écart 2.2 cm",
+   "capture": "2026-11-04T18:26:26.504Z"
+  },
+  {
+   "nom": "scan_16_19h26m29.csv",
+   "ordre": 16,
+   "recale": true,
+   "pose": [
+    -0.21,
+    4.34,
+    70
+   ],
+   "note": "recouvrement 100 % · écart 2.0 cm",
+   "capture": "2026-11-04T18:26:29.471Z"
+  },
+  {
+   "nom": "scan_17_19h26m39.csv",
+   "ordre": 17,
+   "recale": true,
+   "pose": [
+    -0.21,
+    4.34,
+    70.5
+   ],
+   "note": "recouvrement 98 % · écart 1.9 cm",
+   "capture": "2026-11-04T18:26:39.367Z"
+  },
+  {
+   "nom": "scan_18_19h26m57.csv",
+   "ordre": 18,
+   "recale": true,
+   "pose": [
+    0.1,
+    4.65,
+    0
+   ],
+   "note": "recouvrement 96 % · écart 2.0 cm",
+   "capture": "2026-11-04T18:26:57.023Z"
+  },
+  {
+   "nom": "scan_19_19h27m13.csv",
+   "ordre": 19,
+   "recale": true,
+   "pose": [
+    0.54,
+    4.69,
+    3
+   ],
+   "note": "recouvrement 92 % · écart 2.6 cm",
+   "capture": "2026-11-04T18:27:13.094Z"
+  },
+  {
+   "nom": "scan_20_19h27m40.csv",
+   "ordre": 20,
+   "recale": true,
+   "pose": [
+    1.79,
+    2.765,
+    6
+   ],
+   "note": "recouvrement 88 % · écart 3.4 cm",
+   "capture": "2026-11-04T18:27:40.228Z"
+  },
+  {
+   "nom": "scan_21_19h28m03.csv",
+   "ordre": 21,
+   "recale": true,
+   "pose": [
+    2.19,
+    0.715,
+    2
+   ],
+   "note": "recouvrement 86 % · écart 3.2 cm",
+   "capture": "2026-11-04T18:28:03.293Z"
+  },
+  {
+   "nom": "scan_22_19h28m07.csv",
+   "ordre": 22,
+   "recale": true,
+   "pose": [
+    2.19,
+    0.715,
+    1.5
+   ],
+   "note": "recouvrement 90 % · écart 2.8 cm",
+   "capture": "2026-11-04T18:28:07.631Z"
+  },
+  {
+   "nom": "scan_23_19h28m11.csv",
+   "ordre": 23,
+   "recale": true,
+   "pose": [
+    2.19,
+    0.715,
+    1
+   ],
+   "note": "recouvrement 89 % · écart 2.8 cm",
+   "capture": "2026-11-04T18:28:11.479Z"
+  },
+  {
+   "nom": "scan_24_19h28m15.csv",
+   "ordre": 24,
+   "recale": true,
+   "pose": [
+    2.415,
+    0.765,
+    11
+   ],
+   "note": "recouvrement 93 % · écart 2.8 cm",
+   "capture": "2026-11-04T18:28:15.104Z"
+  },
+  {
+   "nom": "scan_25_19h28m18.csv",
+   "ordre": 25,
+   "recale": true,
+   "pose": [
+    2.415,
+    0.765,
+    10.5
+   ],
+   "note": "recouvrement 92 % · écart 2.5 cm",
+   "capture": "2026-11-04T18:28:18.066Z"
+  },
+  {
+   "nom": "scan_26_19h28m46.csv",
+   "ordre": 26,
+   "recale": true,
+   "pose": [
+    3.59,
+    0.74,
+    12.5
+   ],
+   "note": "recouvrement 86 % · écart 4.0 cm",
+   "capture": "2026-11-04T18:28:46.170Z"
+  },
+  {
+   "nom": "scan_27_19h29m36.csv",
+   "ordre": 27,
+   "recale": false,
+   "pose": null,
+   "note": "refusé : plusieurs positions possibles",
+   "capture": "2026-11-04T18:29:36.290Z"
+  },
+  {
+   "nom": "scan_28_19h30m00.csv",
+   "ordre": 28,
+   "recale": true,
+   "pose": [
+    4.865,
+    1.265,
+    3
+   ],
+   "note": "recouvrement 53 % · écart 6.2 cm",
+   "capture": "2026-11-04T18:30:00.474Z"
+  },
+  {
+   "nom": "scan_29_19h30m16.csv",
+   "ordre": 29,
+   "recale": false,
+   "pose": null,
+   "note": "refusé : plusieurs positions possibles",
+   "capture": "2026-11-04T18:30:16.335Z"
+  },
+  {
+   "nom": "scan_30_19h30m52.csv",
+   "ordre": 30,
+   "recale": false,
+   "pose": null,
+   "note": "refusé : plusieurs positions possibles",
+   "capture": "2026-11-04T18:30:52.518Z"
+  },
+  {
+   "nom": "scan_31_19h31m12.csv",
+   "ordre": 31,
+   "recale": false,
+   "pose": null,
+   "note": "refusé : plusieurs positions possibles",
+   "capture": "2026-11-04T18:31:12.391Z"
+  },
+  {
+   "nom": "scan_32_19h31m28.csv",
+   "ordre": 32,
+   "recale": false,
+   "pose": null,
+   "note": "refusé : plusieurs positions possibles",
+   "capture": "2026-11-04T18:31:28.348Z"
+  },
+  {
+   "nom": "scan_33_19h31m56.csv",
+   "ordre": 33,
+   "recale": true,
+   "pose": [
+    4.99,
+    6.19,
+    -176
+   ],
+   "note": "recouvrement 46 % · écart 5.6 cm",
+   "capture": "2026-11-04T18:31:56.297Z"
+  },
+  {
+   "nom": "scan_34_19h32m16.csv",
+   "ordre": 34,
+   "recale": true,
+   "pose": [
+    3.665,
+    6.515,
+    -176.5
+   ],
+   "note": "recouvrement 67 % · écart 5.3 cm",
+   "capture": "2026-11-04T18:32:16.006Z"
+  },
+  {
+   "nom": "scan_35_19h32m34.csv",
+   "ordre": 35,
+   "recale": true,
+   "pose": [
+    3.14,
+    7.265,
+    91.5
+   ],
+   "note": "recouvrement 70 % · écart 4.8 cm",
+   "capture": "2026-11-04T18:32:34.891Z"
+  },
+  {
+   "nom": "scan_36_19h32m52.csv",
+   "ordre": 36,
+   "recale": true,
+   "pose": [
+    3.365,
+    8.315,
+    96
+   ],
+   "note": "recouvrement 66 % · écart 5.2 cm",
+   "capture": "2026-11-04T18:32:52.173Z"
+  },
+  {
+   "nom": "scan_37_19h33m40.csv",
+   "ordre": 37,
+   "recale": true,
+   "pose": [
+    3.565,
+    9.09,
+    103
+   ],
+   "note": "recouvrement 76 % · écart 4.6 cm",
+   "capture": "2026-11-04T18:33:40.836Z"
+  },
+  {
+   "nom": "scan_38_19h33m54.csv",
+   "ordre": 38,
+   "recale": true,
+   "pose": [
+    3.59,
+    9.99,
+    92
+   ],
+   "note": "recouvrement 61 % · écart 4.2 cm",
+   "capture": "2026-11-04T18:33:54.276Z"
+  },
+  {
+   "nom": "scan_39_19h34m10.csv",
+   "ordre": 39,
+   "recale": true,
+   "pose": [
+    3.665,
+    10.89,
+    98
+   ],
+   "note": "recouvrement 52 % · écart 6.0 cm",
+   "capture": "2026-11-04T18:34:10.159Z"
+  },
+  {
+   "nom": "scan_40_19h35m03.csv",
+   "ordre": 40,
+   "recale": true,
+   "pose": [
+    3.665,
+    10.89,
+    98.5
+   ],
+   "note": "recouvrement 71 % · écart 4.2 cm",
+   "capture": "2026-11-04T18:35:03.413Z"
+  }
+ ]
+}
