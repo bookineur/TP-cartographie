@@ -13,3 +13,5 @@ plot_app_version_4.py   : carto/plot_app.py avant la fenêtre « Localiser » (T
 main_version_3.py       : carto/__main__.py avant evaluer --mesurees, localiser --ref-pose, simulate --tp2
 simulate_version_1.py   : carto/simulate.py avant simulate_tp2_session
 register_version_1.py : recalage global avant l'accélération (FFT angle par angle, grilles de taille quelconque).
+README_version_2.md : README avant le passage au scan matching successif.
+register_version_2.py, build_map_version_2.py, main_version_5.py : avant le scan matching successif (assemblage par arbre couvrant).

@@ -95,6 +95,13 @@ class Match:
     score: float        # moyenne du champ sous les points de B (0..1)
     overlap: float      # part des points de B à moins de 10 cm d'un point de A
     second: float       # 2e meilleur score à une pose différente (ambiguïté)
+    best: float = 0.0   # meilleur score de corrélation (même échelle que `second`)
+
+    @property
+    def ambiguity(self) -> float:
+        """second / best : proche de 1 = deux rotations très différentes collent presque
+        aussi bien (salle symétrique) ; la correspondance n'est pas fiable."""
+        return self.second / self.best if self.best > 0 else 1.0
 
 
 def overlap_points(a: np.ndarray, b: np.ndarray, tol=0.10) -> float:
@@ -168,7 +175,8 @@ def match_global(a_pts: np.ndarray, b_local: np.ndarray, res=0.10, step_deg=2.0,
     pose = refine(a_pts, b_local, Pose(tx, ty, best[1]))
     world = pose.transform(b_local)
     fine_field, flo = _field(a_pts, 0.05, margin=reach)
-    return Match(pose, _score_points(fine_field, flo, 0.05, world), overlap_points(a_pts, world), second)
+    return Match(pose, _score_points(fine_field, flo, 0.05, world), overlap_points(a_pts, world), second,
+                 best[0])
 
 
 def refine(a_pts, b_local, pose: Pose, iters=30) -> Pose:
@@ -275,4 +283,93 @@ def assemble(scans: list[Scan], min_overlap=0.45, log=print, points=None):
                 if poses[j] is None:
                     poses[j] = _compose(poses[i], matches[(i, j)].pose)
                     stack.append(j)
+    return poses, groups, matches
+
+
+# ------------------------------------------------- assemblage successif (méthode du cours)
+def _thin(points: np.ndarray, cell=0.03) -> np.ndarray:
+    """Garde un point par case de `cell` m : la carte de points ne grossit pas
+    indéfiniment quand on ajoute des scans du même endroit."""
+    if len(points) == 0:
+        return points
+    _, idx = np.unique(np.floor(points / cell).astype(np.int64), axis=0, return_index=True)
+    return points[np.sort(idx)]
+
+
+def assemble_successif(scans: list[Scan], min_overlap=0.45, max_ambiguity=0.80, n_voisins=6, log=print,
+                       points=None, accept_ambiguous=False, local_overlap=0.70):
+    """Scan matching SUCCESSIF (cours : « Lidar – scan matching successif » et « processus
+    général de cartographie ») :
+      1. le premier scan fixe le repère de la carte ;
+      2. chaque scan suivant, dans l'ordre de capture, est recalé sur le scan PRÉCÉDENT :
+         d'abord localement (ICP en partant de la pose du scan précédent, le robot ayant peu
+         bougé : c'est l'« estimation initiale » du cours) ; si le recouvrement reste
+         inférieur à `local_overlap`, recalage global (toutes les rotations, corrélation puis ICP) ;
+      3. cette pose est affinée par ICP sur la carte déjà construite (limite la dérive) ;
+      4. ses points sont ajoutés à la carte.
+    Si le recalage sur le scan précédent est mauvais (recouvrement < `min_overlap`) ou
+    AMBIGU (une rotation nettement différente colle presque aussi bien, cas d'une salle
+    symétrique : le cours demande d'éviter ces correspondances), on essaie les scans placés
+    juste avant (jusqu'à `n_voisins`), puis on remet le scan à plus tard.
+    Les scans qu'aucun recalage fiable ne rattache restent NON PLACÉS (signalés), sauf avec
+    `accept_ambiguous=True` qui prend alors le moins ambigu (risque de carte fausse).
+    Coût : quelques recalages par scan (au lieu de N² pour `assemble`).
+    Renvoie (poses, groupes, matches) comme `assemble`."""
+    n = len(scans)
+    pts = points if points is not None else [s.local_xy() for s in scans]
+    poses = [None] * n
+    matches = {}
+    poses[0] = Pose()
+    carte = _thin(pts[0])
+    placed = [0]
+    waiting = list(range(1, n))
+
+    def place(k, j, m):
+        nonlocal carte
+        pose = refine(carte, pts[k], _compose(poses[j], m.pose))
+        poses[k] = pose
+        carte = _thin(np.vstack([carte, pose.transform(pts[k])]))
+        placed.append(k)
+        waiting.remove(k)
+        how = "local" if m.best == 1.0 and m.second == 0.0 else f"global, ambiguïté {m.ambiguity:.2f}"
+        log(f"  scan {k + 1} placé sur le scan {j + 1} (recouvrement {m.overlap:.0%}, {how})")
+
+    while waiting:
+        tried = []
+        changed = False
+        for k in list(waiting):
+            # 1) recalage LOCAL sur le scan précédent dans l'ordre de capture : le robot a peu
+            #    bougé, on part de sa pose (estimation initiale du cours) et on affine par ICP
+            j = k - 1
+            if poses[j] is not None and j in placed:
+                rel = refine(pts[j], pts[k], Pose())
+                ov = overlap_points(pts[j], rel.transform(pts[k]))
+                if ov >= local_overlap:
+                    m = Match(rel, 0.0, ov, 0.0, 1.0)
+                    matches[(j, k)] = m
+                    place(k, j, m)
+                    changed = True
+                    continue
+            # 2) sinon recalage GLOBAL (toutes les rotations) sur les derniers scans placés
+            for j in list(reversed(placed))[:n_voisins]:
+                m = matches.get((j, k)) or match_global(pts[j], pts[k])
+                matches[(j, k)] = m
+                if m.overlap >= min_overlap and m.ambiguity <= max_ambiguity:
+                    place(k, j, m)
+                    changed = True
+                    break
+                if m.overlap >= min_overlap:
+                    tried.append((m.ambiguity, k, j))
+        if changed:
+            continue
+        if not tried or not accept_ambiguous:
+            break
+        _, k, j = min(tried)
+        log("  aucun recalage sans ambiguïté : on prend le moins ambigu")
+        place(k, j, matches[(j, k)])
+    groups = [placed] + [[k] for k in waiting]
+    for k in waiting:
+        poses[k] = Pose()
+    if waiting:
+        log(f"  non placés : {', '.join(f'scan {k + 1}' for k in waiting)}")
     return poses, groups, matches

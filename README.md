@@ -99,11 +99,16 @@ La commande suit les étapes du document « Construction d'une carte vectorielle
    - les points trop proches (moins de 10 cm) ou trop lointains (plus de 10 m) ;
    - les **points isolés** (moins de 2 voisins à moins de 15 cm) ;
    - les points de **faible intensité** (moins de 50), seulement si l'intensité a été transmise. Le format Teleplot ne la transmet pas : pour filtrer par intensité, il faut activer `ld06.enableFiltering(); ld06.setIntensityThreshold(...)` sur le robot, ou envoyer en CSV.
-2. **Assemblage.** Si les positions du robot n'ont pas été mesurées (`--use-poses` pour utiliser `poses.json`), elles sont retrouvées par **recalage global** (`carto/register.py`) :
-   - pour chaque paire de scans et chaque rotation de 0 à 360°, la translation est cherchée par corrélation FFT ;
-   - le résultat est affiné par ICP ;
-   - un arbre de recouvrement maximal relie les scans ;
-   - les scans sans recouvrement fiable sont écartés et signalés.
+2. **Assemblage.** Si les positions du robot n'ont pas été mesurées (`--use-poses` pour utiliser `poses.json`), elles sont retrouvées par **scan matching successif**, la méthode du cours (`carto/register.py`, `assemble_successif`) :
+   - le premier scan fixe le repère ;
+   - chaque scan suivant, dans l'ordre de capture, est d'abord recalé **localement** sur le scan précédent : ICP en partant de sa pose, car le robot a peu bougé. C'est l'« estimation initiale » du cours ;
+   - si ça ne colle pas, on fait un recalage **global** sur les derniers scans placés : chaque rotation de 0 à 360°, translation par corrélation, puis ICP. Un recalage **ambigu** est refusé, par exemple quand une autre rotation colle presque aussi bien dans une salle symétrique ;
+   - la pose est affinée par ICP sur la carte déjà construite, puis le scan est ajouté à la carte ;
+   - un scan qu'aucun recalage sûr ne rattache reste **non placé** et il est signalé.
+
+   **Quelle méthode choisir ?**
+   - **Scans pris en roulant avec le robot**, chacun près du précédent (cas de la séance de 200 scans) : laisser la méthode par défaut. Sur une trajectoire simulée de 101 scans, elle met 29 s, avec 8 cm d'erreur médiane et 12 cm de dérive en fin de boucle.
+   - **Scans pris dans le désordre**, par exemple plusieurs sessions mélangées : ajouter `--toutes-paires`. Cette méthode recale toutes les paires puis garde les meilleures liaisons (arbre de recouvrement maximal). Elle ne vient pas du cours et elle est lente (N² recalages), mais elle ne dépend pas de l'ordre. Sur les 39 scans mélangés de la salle, la méthode successive ne plaçait correctement que 10 scans.
 
    La carte est ensuite redressée pour que les murs soient parallèles aux axes.
 3. **Grid map** : `2_grid_map.png` et `gridmap.npz`.

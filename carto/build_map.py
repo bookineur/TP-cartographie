@@ -24,7 +24,7 @@ from matplotlib.figure import Figure
 
 from carto import theme
 from carto.gridmap import build_grid
-from carto.register import assemble, clean_scan, overlap_points, structural_points
+from carto.register import assemble, assemble_successif, clean_scan, overlap_points, structural_points
 from carto.scan import Pose, load_scan_file, save_poses, save_scan_csv
 from carto.theme import C, SCAN_COLORS
 from carto.vectormap import VectorMap
@@ -90,7 +90,8 @@ def next_version_dir(base: Path) -> Path:
 
 
 def build(session: Path, selection: str | None = None, out: Path | None = None, use_saved_poses=False,
-          res=0.05, log=print, excluded: str | None = None, align_walls=True, max_range=10.0) -> dict:
+          res=0.05, log=print, excluded: str | None = None, align_walls=True, max_range=10.0,
+          all_pairs=False) -> dict:
     """`excluded` : scans volontairement écartés de la carte (ex. « 10-14 ») mais
     présentés dans le rapport (figure et explication).
     Sans `out`, chaque exécution écrit dans un NOUVEAU dossier <session>/carte/version_N :
@@ -121,9 +122,20 @@ def build(session: Path, selection: str | None = None, out: Path | None = None, 
         poses, groups = [saved[n] for n in names[:n_used]], [list(range(n_used))]
         log("positions : celles de poses.json")
     else:
-        log("positions inconnues : recalage global de toutes les paires (peut prendre quelques minutes)…")
         t0 = time.time()
-        poses, groups, _ = assemble(clean[:n_used], log=lambda m: None)
+        if all_pairs:
+            log("positions inconnues : recalage global de toutes les paires (peut prendre longtemps)…")
+            poses, groups, _ = assemble(clean[:n_used], log=lambda m: None)
+        else:
+            # méthode du cours : chaque scan, dans l'ordre de capture, est recalé sur la carte déjà construite
+            log("positions inconnues : scan matching successif (chaque scan recalé sur la carte déjà construite)…")
+            poses, groups, ms = assemble_successif(clean[:n_used], log=log)
+            n_glob = sum(1 for m in ms.values() if not (m.best == 1.0 and m.second == 0.0)
+                         and m.overlap >= 0.45 and m.ambiguity <= 0.80)
+            if n_glob:
+                log(f"  attention : {n_glob} scan(s) placé(s) par recalage global (pas près du scan "
+                    "précédent). Vérifiez 1_assemblage.png ; pour des scans pris dans le désordre "
+                    "(plusieurs sessions mélangées), préférez --toutes-paires.")
         log(f"  fait en {time.time() - t0:.0f} s")
     poses = list(poses) + [None] * len(ex_ks)
     if ex_ks:
@@ -230,7 +242,7 @@ def build(session: Path, selection: str | None = None, out: Path | None = None, 
     save_poses(sess / "poses.json", {names[i]: poses[i] for i in placed})
     save_poses(out / "poses_assemblees.json", {names[i]: poses[i] for i in placed})
 
-    info = {"scans": names, "placed": [names[i] for i in placed], "left_out": left_out,
+    info = {"all_pairs": bool(all_pairs), "scans": names, "placed": [names[i] for i in placed], "left_out": left_out,
             "poses": {names[i]: poses[i].as_list_deg() for i in placed}, "consistency": consistency,
             "points_raw": int(sum(map(len, raw))), "points_clean": int(sum(map(len, clean))),
             "has_intensity": bool(has_intensity), "grid_shape": grid.shape, "res": res,
@@ -268,14 +280,27 @@ def _report(info, raw, clean, names) -> str:
     L += ["", "## 3. Assemblage des scans (superposition dans un repère commun)", "",
           "Les positions du robot n'ayant pas été mesurées, elles ont été retrouvées par **recalage** :",
           "",
-          "1. pour chaque paire de scans (A, B) et chaque rotation θ de 0 à 360° (pas de 2°), la "
-          "translation qui superpose le mieux B sur A est cherchée par corrélation (FFT) entre les "
-          "points de B et une grille floutée des points de A ;",
-          "2. la meilleure pose est affinée par **ICP** (Iterative Closest Point, cité dans le cours "
-          "pour la détection de boucle) ;",
-          "3. le **recouvrement** (part des points de B à moins de 10 cm d'un point de A) mesure la "
-          "qualité ; on garde les meilleures liaisons (arbre couvrant de recouvrement maximal) et on "
-          "compose les poses depuis un scan de référence (pose 0, 0, 0).", "",
+          *(["1. pour chaque paire de scans (A, B) et chaque rotation θ de 0 à 360° (pas de 2°), la "
+             "translation qui superpose le mieux B sur A est cherchée par corrélation (FFT) entre les "
+             "points de B et une grille floutée des points de A ;",
+             "2. la meilleure pose est affinée par **ICP** (Iterative Closest Point) ;",
+             "3. le **recouvrement** (part des points de B à moins de 10 cm d'un point de A) mesure la "
+             "qualité ; on garde les meilleures liaisons (arbre couvrant de recouvrement maximal, "
+             "méthode hors cours, option `--toutes-paires`) et on compose les poses depuis un scan de "
+             "référence (pose 0, 0, 0).", ""] if info["all_pairs"] else
+            ["**Scan matching successif** (cours : « Lidar – scan matching successif » et « processus "
+             "général de cartographie ») :", "",
+             "1. le premier scan fixe le repère de la carte (pose 0, 0, 0) ;",
+             "2. chaque scan suivant, dans l'ordre de capture, est recalé sur le scan précédent : pour "
+             "chaque rotation de 0 à 360° (pas de 2°), la translation est cherchée par corrélation "
+             "(« correlative scan matching »), puis affinée par **ICP** ;",
+             "3. la pose obtenue est affinée par ICP sur la carte déjà construite, puis les points du "
+             "scan sont ajoutés à la carte ;",
+             "4. un recalage est refusé si le **recouvrement** (part des points à moins de 10 cm de la "
+             "référence) est trop faible ou s'il est **ambigu** (une rotation nettement différente "
+             "colle presque aussi bien, salle symétrique) : le cours demande d'éviter ces "
+             "correspondances. On essaie alors les scans placés juste avant, ou on réessaie plus tard.",
+             ""]),
           "Formule appliquée à chaque point : P_global = R(θ)·P_local + T(x, y).", "",
           "| scan | x (m) | y (m) | θ (°) | recouvrement avec les autres scans |", "|---|---|---|---|---|"]
     for n in info["placed"]:

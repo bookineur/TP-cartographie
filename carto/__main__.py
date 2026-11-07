@@ -41,7 +41,8 @@ def _filter(scans, args):
 def cmd_assemble(args):
     from carto.build_map import build
     build(Path(args.session), args.scans, Path(args.out) if args.out else None, args.use_poses, args.res,
-          excluded=args.ecartes, align_walls=not args.sans_redressement, max_range=args.portee_max)
+          excluded=args.ecartes, align_walls=not args.sans_redressement, max_range=args.portee_max,
+          all_pairs=args.toutes_paires)
 
 
 def cmd_plot(args):
@@ -203,6 +204,8 @@ def main(argv=None):
     p.add_argument("--res", type=float, default=0.05, help="taille des cellules de la grid map (m)")
     p.add_argument("--portee-max", type=float, default=10.0,
                    help="supprime les points plus loin que cette distance au lidar, en m (défaut 10)")
+    p.add_argument("--toutes-paires", action="store_true",
+                   help="ancienne méthode : recaler toutes les paires de scans (N² recalages, lent)")
     p.set_defaults(func=cmd_assemble)
 
     p = sub.add_parser("plot", help="Lidar Plot : visualiseur temps réel façon Teleplot + captures")
