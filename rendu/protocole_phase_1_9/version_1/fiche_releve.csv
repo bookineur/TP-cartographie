@@ -1,0 +1,10 @@
+mesure;scan;repere;theta_consigne_deg;heure;fichier_brut;dx_axeY_m (lecture 1);dx_axeY_m (lecture 2);dy_axeX_m (lecture 1);dy_axeX_m (lecture 2);ecart_guide_avant_mm;ecart_guide_arriere_mm;theta_calcule_deg;moving=0 (oui/non);photo;remarques
+M1;scan1;R1;0;;;;;;;;;;;;
+M2;scan2;R2;0;;;;;;;;;;;;
+M3;scan3;R3;0;;;;;;;;;;;;
+M4;scan4;R1;90;;;;;;;;;;;;
+M5;scan5;R2;90;;;;;;;;;;;;
+M6;scan6;R3;90;;;;;;;;;;;;
+M7;scan7;R1;180;;;;;;;;;;;;
+M8;scan8;R2;180;;;;;;;;;;;;
+M9;scan9;R3;180;;;;;;;;;;;;

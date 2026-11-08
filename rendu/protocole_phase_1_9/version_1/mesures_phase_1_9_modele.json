@@ -1,0 +1,53 @@
+{
+  "campagne": "Phase 1.9 — poses mesurées au sol (vérité terrain indépendante des algorithmes)",
+  "date": "AAAA-MM-JJ",
+  "operateurs": ["mesure : NOM", "saisie et contrôle : NOM"],
+  "salle": "nom ou numéro de la salle",
+  "outil_acquisition": "Lidar Lab robot Wi-Fi (Auto-SLAM désactivé, capture manuelle) | Lidar Plot USB",
+  "sketch_esp32": "ESP32_robot_wifi_v6, commit XXXXXXX",
+
+  "repere_global": {
+    "origine": "coin choisi (décrire : ex. coin nord-ouest, côté tableau)",
+    "axe_x": "le long du mur ... (ligne de scotch tracée au sol)",
+    "axe_y": "perpendiculaire à X, tracé par triangle 3-4-5 (ligne de scotch)",
+    "theta": "angle de l'axe 0° du LD06 par rapport à +X, sens antihoraire positif, en degrés",
+    "point_mesure": "centre du LD06 (axe de rotation), pas le centre du châssis",
+    "controle_equerrage": {"cote_3_m": null, "cote_4_m": null, "diagonale_mesuree_m": null, "attendu_m": 5.0}
+  },
+
+  "calibration_montage_lidar": {
+    "decalage_axe0_deg": null,
+    "methode": "robot à θ=0° sur le guide, angle du mur y=0 dans le scan local (doit valoir 0°)",
+    "controle_sens": "objet à 1 m devant (+x local) et à 1 m à gauche (+y local) : vu au bon endroit ? oui/non",
+    "fichier_scan_calibration": "nom du fichier"
+  },
+
+  "reperes": [
+    {"id": "R1", "x_m": null, "y_m": null, "description": "position dans la salle, murs et meubles visibles"},
+    {"id": "R2", "x_m": null, "y_m": null, "description": ""},
+    {"id": "R3", "x_m": null, "y_m": null, "description": ""}
+  ],
+  "distances_entre_reperes_mesurees_m": {"R1_R2": null, "R2_R3": null, "R1_R3": null},
+
+  "budget_incertitude_type_B": {
+    "u_xy_m": 0.0025,
+    "u_theta_deg": 0.5,
+    "detail": "voir le tableau du protocole ; à remplacer par les valeurs de votre matériel"
+  },
+
+  "mesures": [
+    {"id": "M1", "scan": "scan1", "repere": "R1", "theta_consigne_deg": 0,   "x_m": null, "y_m": null, "theta_deg": null,
+     "releves": {"dx_axeY_m": null, "dy_axeX_m": null, "ecart_guide_avant_mm": null, "ecart_guide_arriere_mm": null, "base_guide_mm": 200},
+     "fichier_brut": "scan_NN_HHhMMmSS.csv", "sha256_brut": null, "heure": "HH:MM:SS", "moving_0": true, "photo": "M1.jpg", "remarques": ""},
+    {"id": "M2", "scan": "scan2", "repere": "R2", "theta_consigne_deg": 0,   "x_m": null, "y_m": null, "theta_deg": null, "releves": {}, "fichier_brut": "", "sha256_brut": null, "heure": "", "moving_0": true, "photo": "", "remarques": ""},
+    {"id": "M3", "scan": "scan3", "repere": "R3", "theta_consigne_deg": 0,   "x_m": null, "y_m": null, "theta_deg": null, "releves": {}, "fichier_brut": "", "sha256_brut": null, "heure": "", "moving_0": true, "photo": "", "remarques": ""},
+    {"id": "M4", "scan": "scan4", "repere": "R1", "theta_consigne_deg": 90,  "x_m": null, "y_m": null, "theta_deg": null, "releves": {}, "fichier_brut": "", "sha256_brut": null, "heure": "", "moving_0": true, "photo": "", "remarques": ""},
+    {"id": "M5", "scan": "scan5", "repere": "R2", "theta_consigne_deg": 90,  "x_m": null, "y_m": null, "theta_deg": null, "releves": {}, "fichier_brut": "", "sha256_brut": null, "heure": "", "moving_0": true, "photo": "", "remarques": ""},
+    {"id": "M6", "scan": "scan6", "repere": "R3", "theta_consigne_deg": 90,  "x_m": null, "y_m": null, "theta_deg": null, "releves": {}, "fichier_brut": "", "sha256_brut": null, "heure": "", "moving_0": true, "photo": "", "remarques": ""},
+    {"id": "M7", "scan": "scan7", "repere": "R1", "theta_consigne_deg": 180, "x_m": null, "y_m": null, "theta_deg": null, "releves": {}, "fichier_brut": "", "sha256_brut": null, "heure": "", "moving_0": true, "photo": "", "remarques": ""},
+    {"id": "M8", "scan": "scan8", "repere": "R2", "theta_consigne_deg": 180, "x_m": null, "y_m": null, "theta_deg": null, "releves": {}, "fichier_brut": "", "sha256_brut": null, "heure": "", "moving_0": true, "photo": "", "remarques": ""},
+    {"id": "M9", "scan": "scan9", "repere": "R3", "theta_consigne_deg": 180, "x_m": null, "y_m": null, "theta_deg": null, "releves": {}, "fichier_brut": "", "sha256_brut": null, "heure": "", "moving_0": true, "photo": "", "remarques": ""}
+  ],
+
+  "scene": {"porte": "ouverte/fermée", "personnes_presentes": 0, "objets_deplaces": "", "eclairage_soleil": ""}
+}

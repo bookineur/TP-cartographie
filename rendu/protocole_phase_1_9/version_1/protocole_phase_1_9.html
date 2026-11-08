@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Protocole poses mesurées</title>
+<style>
+  :root { --ink:#1b1f24; --muted:#5b6470; --line:#c9cfd6; --accent:#1f5fa8; --bg:#ffffff; --soft:#f3f5f8; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 11pt/1.45 "Segoe UI", Arial, sans-serif; }
+  main { max-width: 190mm; margin: 0 auto; padding: 12mm 10mm; }
+  h1 { font-size: 17pt; margin: 0 0 2mm; }
+  h2 { font-size: 13pt; margin: 7mm 0 2mm; padding-bottom: 1mm; border-bottom: 2px solid var(--accent); color: var(--accent); break-after: avoid; }
+  h3 { font-size: 11pt; margin: 4mm 0 1mm; break-after: avoid; }
+  p, li { margin: 1mm 0; }
+  ul, ol { padding-left: 6mm; margin: 1mm 0; }
+  .sub { color: var(--muted); font-size: 9.5pt; }
+  table { width: 100%; border-collapse: collapse; margin: 2mm 0; font-size: 9.5pt; break-inside: avoid; }
+  th, td { border: 1px solid var(--line); padding: 1.2mm 1.6mm; text-align: left; vertical-align: top; }
+  th { background: var(--soft); }
+  code { font: 9pt Consolas, monospace; background: var(--soft); padding: 0 1mm; border-radius: 2px; }
+  pre { font: 9pt Consolas, monospace; background: var(--soft); padding: 2mm 3mm; border-radius: 2px; white-space: pre-wrap; margin: 1.5mm 0; }
+  .box { border: 1px solid var(--line); border-left: 4px solid var(--accent); padding: 2mm 3mm; margin: 2mm 0; background: var(--soft); break-inside: avoid; }
+  .warn { border-left-color: #b45309; }
+  .fill td { height: 9mm; }
+  .check li { list-style: none; margin-left: -5mm; }
+  .check li::before { content: "☐  "; }
+  .page { break-before: page; }
+  @media print { main { padding: 0; } @page { size: A4; margin: 12mm; } a { color: inherit; text-decoration: none; } }
+  @media (max-width: 600px) { main { padding: 4mm 4mm; } table { font-size: 8.5pt; } }
+</style>
+</head>
+<body>
+<main>
+
+<h1>Phase 1.9 — Protocole expérimental de localisation</h1>
+<p class="sub">Campagne de poses mesurées au sol · 3 repères × 3 poses = 9 mesures · TP Cartographie et localisation (LD06)</p>
+
+<div class="box">
+<strong>But.</strong> Obtenir une <strong>vérité terrain indépendante des algorithmes</strong> (Auto-SLAM, scan matching) : les 9 poses sont mesurées au mètre et à l’équerre, jamais calculées à partir des scans.
+<ul>
+<li>Elles servent à chiffrer l’erreur réelle des méthodes de localisation du jour 2.</li>
+<li>Elles servent à comparer Lidar Lab et TP-cartographie sur les mêmes données.</li>
+<li>Elles permettent de dire, sur une trajectoire réelle, si c’est le bouton ou l’Auto-SLAM qui a raison (partie 10, facultative).</li>
+</ul>
+<strong>Ce que la campagne ne mesure pas :</strong> la précision absolue au-delà de l’incertitude du mètre et de l’équerre. Celle-ci est chiffrée à la partie 7.
+</div>
+
+<h2>1. Repère global X, Y, θ</h2>
+<ul>
+<li><strong>Origine O</strong> : un coin de la salle dont les deux murs sont droits et dégagés sur au moins 2 m. Le décrire sur la fiche (ex. « coin côté tableau, à gauche de la porte »).</li>
+<li><strong>Axe X</strong> : ligne de scotch tracée au sol, parallèle au premier mur, à environ 10 cm de lui. On mesure les distances à cette ligne, pas au mur (les plinthes et les défauts du mur faussent la mesure).</li>
+<li><strong>Axe Y</strong> : ligne perpendiculaire à X, tracée avec un <strong>triangle 3-4-5</strong> (3 m sur X, 4 m sur Y, diagonale 5 m à ± 3 mm). Noter la diagonale mesurée.</li>
+<li><strong>Point mesuré</strong> : le <strong>centre du LD06</strong> (axe de rotation du capteur), et non le centre du châssis. On le marque d’une croix sur le capot du robot.</li>
+<li><strong>θ</strong> : angle entre l’<strong>axe 0° du LD06</strong> et +X, compté <strong>dans le sens antihoraire</strong> (convention du cours, sens trigonométrique), en degrés.</li>
+<li>Les poses sont notées <code>[x_m, y_m, θ_deg]</code>, le format de <code>poses.json</code> lu par TP-cartographie et Lidar Lab.</li>
+</ul>
+
+<h2>2. Choix des trois repères R1, R2, R3</h2>
+<table>
+<tr><th>Critère</th><th>Valeur</th><th>Pourquoi</th></tr>
+<tr><td>Distance entre deux repères</td><td><strong>1,0 à 1,3 m</strong> (jamais moins de 0,5 m ni plus de 1,5 m)</td><td>L’outil regroupe en un même repère les poses à moins de 15 cm. La localisation entre scans n’utilise qu’un scan d’un autre repère situé à moins de 1,5 m.</td></tr>
+<tr><td>Disposition</td><td>Triangle, <strong>non aligné</strong></td><td>Varier les directions de déplacement et éviter que les trois repères voient la même chose.</td></tr>
+<tr><td>Distance aux obstacles</td><td>≥ 0,8 m des murs et des meubles</td><td>Laisser tourner le robot sur place et poser l’équerre.</td></tr>
+<tr><td>Vue</td><td>Chaque repère voit au moins deux murs <strong>et</strong> un meuble ou une porte</td><td>Éviter les positions symétriques (centre d’une salle vide), qui sont ambiguës pour le scan matching.</td></tr>
+<tr><td>Sol</td><td>Plat, sans tapis ni câble</td><td>Le robot ne doit pas pencher, sinon le plan du LD06 bascule.</td></tr>
+</table>
+<p><strong>Marquage :</strong> pour chaque repère, faire une croix fine au scotch (deux traits de 4 cm), plus une <strong>ligne-guide</strong> de 40 cm parallèle à X passant par la croix. C’est contre elle qu’on oriente le robot.</p>
+<p><strong>Coordonnées des repères :</strong> distance perpendiculaire de la croix à la ligne Y (donne x) et à la ligne X (donne y), mesurée à l’équerre, <strong>deux fois par deux personnes</strong>. Mesurer aussi les trois distances R1-R2, R2-R3 et R1-R3. Elles doivent correspondre aux coordonnées à <strong>± 1 cm</strong> près ; sinon, refaire la mesure.</p>
+
+<h2>3. Vérifications des 5 premières minutes</h2>
+<ol>
+<li><strong>Sens du LD06</strong> : poser un objet fin (pied de chaise, boîte) à 1 m <strong>devant</strong> le robot, puis à 1 m <strong>à sa gauche</strong>. Dans l’aperçu, il doit apparaître en +x, puis en +y. Sinon, la carte est en miroir : corriger l’option « miroir » avant de continuer.</li>
+<li><strong>Axe 0° du LD06 par rapport au châssis</strong> : robot sur R1, châssis aligné sur la ligne-guide (θ consigne = 0°), capturer un scan. Plus tard, mesurer dans ce scan l’angle δ du mur parallèle à X. C’est le <strong>décalage de montage</strong> : θ_LD06 = θ_châssis + δ. Le noter sur la fiche.</li>
+<li><strong>Capture</strong> : un essai complet, de la capture jusqu’au fichier sur le disque. Vérifier que la ligne d’en-tête du scan indique <code>moving=0</code>.</li>
+</ol>
+
+<h2>4. Mesure des neuf poses</h2>
+<p><strong>Ordre entrelacé</strong> : le robot change de repère à chaque mesure, ce qui rend chaque placement indépendant.</p>
+<table>
+<tr><th>Mesure</th><th>M1</th><th>M2</th><th>M3</th><th>M4</th><th>M5</th><th>M6</th><th>M7</th><th>M8</th><th>M9</th></tr>
+<tr><td>Repère</td><td>R1</td><td>R2</td><td>R3</td><td>R1</td><td>R2</td><td>R3</td><td>R1</td><td>R2</td><td>R3</td></tr>
+<tr><td>θ consigne</td><td>0°</td><td>0°</td><td>0°</td><td>90°</td><td>90°</td><td>90°</td><td>180°</td><td>180°</td><td>180°</td></tr>
+<tr><td>Fichier final</td><td>scan1</td><td>scan2</td><td>scan3</td><td>scan4</td><td>scan5</td><td>scan6</td><td>scan7</td><td>scan8</td><td>scan9</td></tr>
+</table>
+<p><strong>Pour chaque mesure :</strong></p>
+<ol>
+<li>Poser le robot, la croix du capot à l’aplomb de la croix au sol (fil à plomb ou équerre verticale).</li>
+<li>Orienter le châssis :
+  <ul>
+  <li>à 0° et 180°, son flanc est parallèle à la ligne-guide ;</li>
+  <li>à 90°, il est perpendiculaire à la ligne-guide (équerre posée sur la ligne).</li>
+  </ul></li>
+<li><strong>Mesurer θ</strong> : écart entre le flanc du châssis et la ligne-guide (ou l’équerre), en mm, à l’avant (e_av) et à l’arrière (e_ar), sur une base b = 200 mm. Alors θ = θ_consigne + atan((e_av − e_ar) / b) + δ, avec le signe positif si l’avant s’écarte vers la gauche du robot.</li>
+<li><strong>Mesurer x et y</strong> du centre du LD06 : distance perpendiculaire à la ligne Y (x) et à la ligne X (y). Deux lectures chacune, par deux personnes. Si elles diffèrent de plus de 3 mm, refaire.</li>
+<li>Robot immobile, moteurs arrêtés, personne dans le champ : attendre 2 tours stables, puis <strong>capturer</strong>. Noter le nom du fichier brut et l’heure, et prendre une photo du robot sur la croix.</li>
+<li><strong>Soulever le robot et l’éloigner</strong> d’au moins 1 m avant la mesure suivante.</li>
+</ol>
+<p class="sub">Outil conseillé : Lidar Lab avec le robot en Wi-Fi, <strong>Auto-SLAM décoché</strong>, bouton « Capturer et ajouter à la carte ». Le fichier contient l’intensité et l’état <code>moving</code>. On ignore la pose calculée par Lidar Lab : la pose de référence est celle mesurée. À défaut, utiliser Lidar Plot en USB.</p>
+
+<h2>5. Association scans ↔ poses</h2>
+<ol>
+<li>Créer le dossier <code>data/mesures_phase19_AAAA-MM-JJ/</code> dans TP-cartographie.</li>
+<li>Copier les 9 fichiers bruts <strong>tels quels</strong> dans <code>bruts/</code> et calculer leur empreinte SHA-256. Ils ne seront plus jamais modifiés.</li>
+<li>Copier chacun sous son nom final <code>scan1.csv</code> … <code>scan9.csv</code>, selon la fiche (M<em>k</em> → scan<em>k</em>).</li>
+<li>Remplir :
+  <ul>
+  <li><code>poses.json</code> : <code>{"scanK": [x_m, y_m, θ_deg]}</code>, à partir du gabarit <code>poses_modele.json</code> ;</li>
+  <li><code>mesures.json</code> : toutes les lectures brutes, les repères, le décalage δ, le budget d’incertitude et les empreintes SHA-256, à partir du gabarit <code>mesures_phase_1_9_modele.json</code>.</li>
+  </ul></li>
+<li>Contrôler : 9 fichiers, 9 poses, aucune pose à (0, 0, 0), et <code>moving=0</code> dans chaque en-tête.</li>
+</ol>
+
+<h2>6. Calcul des poses (rappel)</h2>
+<pre>x = distance perpendiculaire du centre LD06 à la ligne Y
+y = distance perpendiculaire du centre LD06 à la ligne X
+θ = θ_consigne + atan((e_av − e_ar) / 200 mm) + δ      (en degrés, sens antihoraire)</pre>
+
+<h2>7. Incertitudes</h2>
+<h3>a) Budget a priori (type B), à compléter avec votre matériel</h3>
+<table>
+<tr><th>Source</th><th>Étendue</th><th>u (écart-type)</th></tr>
+<tr><td>Lecture du mètre ruban</td><td>± 1 mm</td><td>0,6 mm</td></tr>
+<tr><td>Marquage de la croix au sol</td><td>± 1 mm</td><td>0,6 mm</td></tr>
+<tr><td>Centre du LD06 à l’aplomb de la croix</td><td>± 3 mm</td><td>1,7 mm</td></tr>
+<tr><td>Équerrage des axes (diagonale 5 m à ± 3 mm, soit ± 0,04°) à 3 m</td><td>± 2 mm</td><td>1,2 mm</td></tr>
+<tr><td><strong>Position x ou y combinée</strong></td><td></td><td><strong>≈ 2,3 mm</strong> (soit ± 5 mm à 95 %)</td></tr>
+<tr><td>θ : écarts au guide ± 0,5 mm sur une base de 200 mm</td><td>± 0,2°</td><td>0,12°</td></tr>
+<tr><td>θ : décalage de montage δ résiduel</td><td>± 0,5°</td><td>0,3°</td></tr>
+<tr><td>θ : rigidité ou jeu du support du LD06</td><td>± 0,5°</td><td>0,3°</td></tr>
+<tr><td><strong>θ combiné</strong></td><td></td><td><strong>≈ 0,45°</strong> (soit ± 0,9° à 95 %)</td></tr>
+</table>
+<h3>b) Mesure a posteriori (type A) : la répétabilité</h3>
+<p>Les 3 poses de chaque repère donnent <strong>9 paires</strong>. Pour chacune, l’outil recale une capture sur l’autre et compare le résultat aux poses mesurées. Le désaccord médian chiffre l’incertitude réelle des poses de référence.</p>
+<p><strong>Contrôle</strong> : si la répétabilité médiane dépasse <strong>2 fois</strong> le budget (plus de 5 mm ou plus de 1°), une source d’erreur a été oubliée (δ, aplomb, support du LD06). Il faut la chercher <strong>avant</strong> d’interpréter les erreurs des méthodes.</p>
+
+<h2>8. Évaluation dans TP-cartographie</h2>
+<pre>python -m carto evaluer --reel data/mesures_phase19_AAAA-MM-JJ --mesurees --sans-simulation
+python -m carto evaluer --reel data/mesures_phase19_AAAA-MM-JJ --mesurees --sans-simulation --incertitude 0.005 0.9</pre>
+<ul>
+<li>Le premier lancement estime l’incertitude par la répétabilité. Le second impose le budget de la partie 7a. On compare les deux.</li>
+<li>Pour chaque scan, la grid map et la carte vectorielle sont construites <strong>sans les scans du même repère</strong>. Entre scans, la référence est le scan d’un autre repère le plus proche, à moins de 1,5 m.</li>
+<li>Méthodes testées : brute force, multi-résolution, Gauss-Newton, ICP, particules, calcul direct. Cinq niveaux d’erreur de départ, de 5 cm / 2° à 50 cm / 20°.</li>
+<li>Ce qu’il faut lire dans <code>synthese.md</code> :
+  <ul>
+  <li>le <strong>taux de convergence</strong>, avec son intervalle de confiance ;</li>
+  <li>l’<strong>écart à la pose mesurée</strong> (moyenne ± écart-type) ;</li>
+  <li>la <strong>répétabilité</strong>, qu’on compare au budget.</li>
+  </ul>
+  Un écart du même ordre que l’incertitude des poses ne permet pas de classer les méthodes.</li>
+</ul>
+<p class="sub">Répétition à blanc faite le 08/11/2026 avec 9 scans simulés dans ce format : 9 paires de répétabilité et les 4 références sont évaluées correctement.</p>
+
+<h2>9. Comparaison Lidar Lab ↔ TP-cartographie</h2>
+<p><strong>Mêmes scans, mêmes cartes, mêmes poses de départ.</strong></p>
+<ul>
+<li><strong>Scans</strong> : les 9 <code>scanK.csv</code>.</li>
+<li><strong>Carte de référence</strong> pour le scan K : les 6 scans des deux <strong>autres</strong> repères, placés à leurs poses mesurées.</li>
+<li><strong>Poses de départ</strong> : pose mesurée + décalage lu dans <code>decalages_depart_comparaison.csv</code>, fixé à l’avance (graine 19). Ce fichier donne 3 niveaux d’erreur, 10 cm / 5°, 20 cm / 8° et 35 cm / 12° (tirés entre 75 et 100 % du niveau), soit <strong>27 cas</strong>.</li>
+</ul>
+<table>
+<tr><th></th><th>Lidar Lab</th><th>TP-cartographie</th></tr>
+<tr><td>Préparer</td><td>Charger les 9 scans, puis « Poses JSON » = <code>poses.json</code>. Décocher le scan K et les 2 autres scans du même repère, garder visibles les 6 autres.</td><td><code>python -m carto assemble data/… --use-poses --scans &lt;6 autres&gt; --sans-redressement --out …</code> (donne <code>gridmap.npz</code> et <code>carte_vectorielle.txt</code>)</td></tr>
+<tr><td>Départ</td><td>Saisir x, y, θ = pose mesurée + décalage dans les champs du scan K</td><td><code>--init x y θ</code></td></tr>
+<tr><td>Lancer</td><td>« Comparer les méthodes » (exhaustive grid, vectorielle, ICP), puis exporter <code>comparaison_localisation.csv</code></td><td><code>python -m carto localiser scanK.csv --ref gridmap.npz --init x y θ</code>, puis la même commande avec <code>--ref carte_vectorielle.txt</code></td></tr>
+<tr><td>Relever</td><td colspan="2">Pose trouvée, erreur en m et en ° par rapport à la pose mesurée, temps, et réussite (&lt; 5 cm et &lt; 2°). Préciser si le résultat est accepté ou refusé.</td></tr>
+</table>
+<div class="box warn"><strong>À savoir.</strong>
+<ul>
+<li>Les deux outils ne construisent pas la grille de la même façon (Bresenham dans Lidar Lab, supercover dans TP-cartographie), et leurs méthodes et scores diffèrent. La comparaison mesure donc les deux <strong>chaînes complètes</strong>.</li>
+<li>Faits à la main, les 27 cas × 2 outils prennent environ 2 heures. Les automatiser demande un petit script, à valider séparément.</li>
+</ul></div>
+
+<h2>10. Facultatif : vérité terrain sur une trajectoire</h2>
+<p>Lancer une séance Auto-SLAM qui part de R1, puis arrêter le robot <strong>exactement</strong> sur R2 et R3 (croix et ligne-guide), et y mesurer la pose comme à la partie 4.</p>
+<ul>
+<li>Les poses calculées sur R2 et R3 par l’Auto-SLAM, et par le bouton « Localiser et construire la carte », se comparent alors à une mesure indépendante.</li>
+<li>C’est ce qui tranche des désaccords comme celui du scan 28 de la séance du 04/11.</li>
+</ul>
+
+<h2>11. Matériel</h2>
+<ul class="check">
+<li>Robot Mecanum, LD06 et ESP32 (sketch v6), batterie chargée et câble de secours</li>
+<li>PC avec Lidar Lab (serveur) ou Lidar Plot, et partage de connexion « MK »</li>
+<li>Mètre ruban de 5 m, classe II, plus un réglet métallique de 30 cm (pour e_av et e_ar)</li>
+<li>Grande équerre (≥ 30 cm) et petite équerre</li>
+<li>Fil à plomb ou équerre verticale (centre du LD06 à l’aplomb de la croix)</li>
+<li>Scotch de masquage fin (croix, lignes-guides) et scotch large (axes X et Y)</li>
+<li>Feutre fin, fiches de relevé imprimées (page suivante) et 2 stylos</li>
+<li>Téléphone pour les photos de chaque placement</li>
+<li>Objet fin de contrôle (boîte ou pied) pour le test du sens du LD06</li>
+<li>Clé USB ou dossier de sauvegarde (copie des fichiers bruts)</li>
+</ul>
+
+<h2>12. Précautions expérimentales</h2>
+<ul>
+<li><strong>Scène figée</strong> : personne dans le champ du LD06 pendant les captures. La porte reste dans le même état du début à la fin, et aucun meuble ne bouge. Noter toute exception.</li>
+<li><strong>Robot immobile</strong> : moteurs arrêtés, <code>moving=0</code>, 2 tours stables avant la capture. Ne jamais toucher le robot pendant la capture.</li>
+<li><strong>Repères intacts</strong> : ne pas marcher sur les croix ; vérifier le scotch avant chaque pose.</li>
+<li><strong>Le LD06 est la référence</strong> : on mesure le centre du capteur, pas le centre du châssis, et on reporte le décalage δ.</li>
+<li><strong>Double lecture</strong> : deux personnes pour x, y, e_av et e_ar. Écrire sur la fiche <strong>avant</strong> de saisir dans l’ordinateur.</li>
+<li><strong>Données brutes intactes</strong> : copier les fichiers et calculer leurs empreintes. Ne jamais éditer un scan à la main.</li>
+<li><strong>Indépendance</strong> : ne pas « corriger » une mesure parce qu’un algorithme donne autre chose. Une mesure douteuse se refait au sol, puis on note les deux valeurs.</li>
+<li><strong>Batterie</strong> : une tension faible change la vitesse du LD06. Recharger si l’aperçu ralentit (fréquence &lt; 10 Hz dans l’en-tête).</li>
+<li><strong>Surfaces piégeuses</strong> : vitres, miroirs, écrans noirs. Les noter : ils expliquent des points « dans le vide ».</li>
+</ul>
+
+<section class="page">
+<h2>Fiche de relevé — à imprimer</h2>
+<p class="sub">Date : ____________ · Salle : ____________ · Opérateurs : ________________________ · Origine O : ________________________</p>
+<p class="sub">Diagonale 3-4-5 : ______ m · δ (axe 0° du LD06) : ______ ° · Sens du LD06 vérifié : ☐ oui · R1 (x, y) : ________ · R2 : ________ · R3 : ________ · R1-R2 / R2-R3 / R1-R3 : ______ / ______ / ______ m</p>
+<table class="fill">
+<tr><th>Mesure</th><th>Rep.</th><th>θ cons.</th><th>Heure</th><th>Fichier brut</th><th>x (1) / (2)</th><th>y (1) / (2)</th><th>e_av / e_ar (mm)</th><th>θ calculé</th><th>moving=0</th><th>Remarques</th></tr>
+<tr><td>M1</td><td>R1</td><td>0°</td><td></td><td></td><td></td><td></td><td></td><td></td><td>☐</td><td></td></tr>
+<tr><td>M2</td><td>R2</td><td>0°</td><td></td><td></td><td></td><td></td><td></td><td></td><td>☐</td><td></td></tr>
+<tr><td>M3</td><td>R3</td><td>0°</td><td></td><td></td><td></td><td></td><td></td><td></td><td>☐</td><td></td></tr>
+<tr><td>M4</td><td>R1</td><td>90°</td><td></td><td></td><td></td><td></td><td></td><td></td><td>☐</td><td></td></tr>
+<tr><td>M5</td><td>R2</td><td>90°</td><td></td><td></td><td></td><td></td><td></td><td></td><td>☐</td><td></td></tr>
+<tr><td>M6</td><td>R3</td><td>90°</td><td></td><td></td><td></td><td></td><td></td><td></td><td>☐</td><td></td></tr>
+<tr><td>M7</td><td>R1</td><td>180°</td><td></td><td></td><td></td><td></td><td></td><td></td><td>☐</td><td></td></tr>
+<tr><td>M8</td><td>R2</td><td>180°</td><td></td><td></td><td></td><td></td><td></td><td></td><td>☐</td><td></td></tr>
+<tr><td>M9</td><td>R3</td><td>180°</td><td></td><td></td><td></td><td></td><td></td><td></td><td>☐</td><td></td></tr>
+</table>
+<p class="sub">Scène : porte ☐ ouverte ☐ fermée · personnes présentes : ____ · objets déplacés : __________________________</p>
+</section>
+
+</main>
+</body>
+</html>
