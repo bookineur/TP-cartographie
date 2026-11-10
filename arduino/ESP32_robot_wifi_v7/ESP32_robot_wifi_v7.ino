@@ -1,7 +1,8 @@
 // ============================================================================
 //  ESP32 + LD06 : pilotage Wi-Fi, grid map automatique, liaison avec Lidar Lab sur le PC — version 7
 //
-//  Nouveauté de la v7 : le robot crée DIRECTEMENT son propre Wi-Fi « Robot-LiDAR » (192.168.4.1),
+//  Nouveauté de la v7 : le robot crée DIRECTEMENT son propre Wi-Fi (AP_NAME de wifi_secrets.h,
+//  sinon « Robot-LiDAR ») à l'adresse 192.168.4.1,
 //  sans chercher d'autre réseau. Le PC et le téléphone se connectent à Robot-LiDAR.
 //  Mot de passe : AP_PASS dans wifi_secrets.h (ignoré par git) ; sans lui, mot de passe temporaire
 //  propre à la carte, affiché dans le moniteur série (115200 bauds).
@@ -75,7 +76,11 @@ const char *MDNS_NAME = "robot-lidar";  // http://robot-lidar.local
 bool stationMode = false;               // true = connecté à ton Wi-Fi ; false = point d'accès Robot-LiDAR
 
 // Réseau créé par le robot si ton Wi-Fi n'est pas disponible
-const char *AP_SSID = "Robot-LiDAR";  // mot de passe : voir temporaryApPassword() plus bas
+#ifdef AP_NAME
+const char *AP_SSID = AP_NAME;  // nom choisi dans wifi_secrets.h (unique : plusieurs robots du TP s'appellent Robot-LiDAR)
+#else
+const char *AP_SSID = "Robot-LiDAR";
+#endif
 
 // ---------------- LiDAR ----------------
 #define RX_LIDAR      33
