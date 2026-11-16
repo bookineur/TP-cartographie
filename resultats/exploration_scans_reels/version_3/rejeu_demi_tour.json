@@ -1,0 +1,55 @@
+{
+ "10/11": {
+  "scans": 48,
+  "arrets_a_tort": 0,
+  "demi_tours": 0,
+  "demi_tours_bloques": 0,
+  "arrets_aucune_direction": 0,
+  "detail": []
+ },
+ "04/11": {
+  "scans": 35,
+  "arrets_a_tort": 0,
+  "demi_tours": 3,
+  "demi_tours_bloques": 0,
+  "arrets_aucune_direction": 1,
+  "detail": [
+   {
+    "k": 1,
+    "scan": "scan_01_19h20m09.csv",
+    "chemin_existe": true,
+    "decision": "arrêt : aucune direction libre"
+   },
+   {
+    "k": 9,
+    "scan": "scan_09_19h26m04.csv",
+    "chemin_existe": true,
+    "decision": "demi-tour",
+    "turnDeg": 150,
+    "pas": 0.35,
+    "degagement": 1.071,
+    "pas_bloque": false
+   },
+   {
+    "k": 10,
+    "scan": "scan_10_19h26m07.csv",
+    "chemin_existe": true,
+    "decision": "demi-tour",
+    "turnDeg": 150,
+    "pas": 0.35,
+    "degagement": 2.485,
+    "pas_bloque": false
+   },
+   {
+    "k": 11,
+    "scan": "scan_11_19h26m11.csv",
+    "chemin_existe": true,
+    "decision": "demi-tour",
+    "turnDeg": -180,
+    "pas": 0.35,
+    "degagement": 2.64,
+    "pas_bloque": false
+   }
+  ]
+ }
+}
