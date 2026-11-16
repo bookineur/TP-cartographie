@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><title>Essai exploration robot</title>
+<style>
+ @page { size: A4; margin: 15mm; }
+ body { font-family: Calibri, Arial, sans-serif; font-size: 10.5pt; color: #222; line-height: 1.35; }
+ h1 { color: #1F4E79; font-size: 18pt; margin: 0 0 4px; }
+ h2 { color: #1F4E79; font-size: 12.5pt; margin: 14px 0 4px; border-bottom: 1px solid #1F4E79; }
+ .sous { color: #555; margin-bottom: 8px; }
+ .note { background: #FFF4E5; border-left: 4px solid #c47f00; padding: 6px 9px; margin: 6px 0; }
+ .info { background: #EAF2FB; border-left: 4px solid #1F4E79; padding: 6px 9px; margin: 6px 0; }
+ code { font-family: Consolas, monospace; font-size: 9.5pt; background: #f2f2f2; padding: 0 2px; }
+ table { border-collapse: collapse; width: 100%; margin: 4px 0 8px; }
+ th, td { border: 1px solid #999; padding: 4px 5px; text-align: left; vertical-align: top; }
+ th { background: #1F4E79; color: #fff; font-size: 9.5pt; }
+ td.v { height: 20px; }
+ ol li, ul li { margin-bottom: 3px; }
+ .case { display: inline-block; width: 11px; height: 11px; border: 1px solid #333; margin-right: 4px; vertical-align: -1px; }
+ .saut { page-break-before: always; }
+</style></head><body>
+<h1>Fiche d'essai — Exploration automatique sur le vrai robot</h1>
+<div class="sous">Bonus du TP : « déplacer le robot automatiquement pour construire la carte en temps réel ». Premier essai réel (fiche version 3 : tient compte des tests sur les scans réels du 04/11 et du 10/11 et des deux correctifs). Date : ................ Opérateur : ................................</div>
+
+<div class="note"><b>Pourquoi cet essai est prudent.</b> L'exploration n'a été validée qu'en simulation. Sur le vrai robot, deux choses sont inconnues : la <b>vitesse réelle</b> à la consigne de 35 % (le logiciel suppose 0,25 m/s) et le comportement du lidar face aux vitres, aux pieds de chaises et aux personnes. On commence donc par <b>1 pas</b>, puis 3, puis davantage seulement si tout s'est bien passé.</div>
+
+<h2>1. Critères fixés AVANT l'essai</h2>
+<table>
+<tr><th style="width:4%">#</th><th style="width:56%">Critère</th><th>Si non atteint</th></tr>
+<tr><td>1</td><td><b>Aucun contact</b> avec un mur, un meuble ou une personne, et aucun STOP d'urgence nécessaire.</td><td>Arrêt des essais ; noter la situation exacte.</td></tr>
+<tr><td>2</td><td>Après étalonnage, chaque pas parcourt entre <b>75 % et 125 %</b> de la distance visée (« déplacement mesuré par le lidar » dans le panneau).</td><td>Corriger la vitesse estimée une fois ; si toujours hors limite, arrêt.</td></tr>
+<tr><td>3</td><td>Chaque pas est <b>recalé</b>, ou bien l'exploration s'arrête d'elle-même sur « position perdue » avec le robot arrêté.</td><td>Noter le pas ; garder la séance pour analyse.</td></tr>
+<tr><td>4</td><td>Le robot <b>s'arrête seul</b> à la fin (nombre de pas atteint, plus de zone inconnue, ou STOP) et le pilotage manuel est refusé pendant l'exploration.</td><td>Arrêt des essais.</td></tr>
+</table>
+<div class="info">Quoi qu'il arrive, le résultat est rapporté tel quel dans le rapport, y compris un échec. Aucun réglage n'est modifié pendant l'essai, sauf la vitesse estimée à l'étape 4 (une seule correction, calculée par la formule ci-dessous).</div>
+
+<h2>2. Matériel et sécurité</h2>
+<ul>
+<li><span class="case"></span>Robot chargé, sketch <b>v7</b> téléversé (Wi-Fi du robot « MK-LiDAR »).</li>
+<li><span class="case"></span>PC connecté au Wi-Fi du robot ; téléphone facultatif.</li>
+<li><span class="case"></span>Zone dégagée d'au moins <b>2 m × 2 m</b> pour les étapes 3 et 4 ; personne ne passe devant le robot.</li>
+<li><span class="case"></span>Un mètre ruban et du scotch (facultatif : pour vérifier la mesure du lidar).</li>
+<li><span class="case"></span><b>Une personne reste à côté du robot</b>, prête à le soulever. Sur le PC : bouton <b>« Arrêter l'exploration »</b> ou touche <b>Espace</b>. Sécurité du robot : il s'arrête seul après 0,7 s sans ordre (coupure Wi-Fi).</li>
+</ul>
+
+<h2>3. Déroulé</h2>
+<ol>
+<li><b>Lancer le serveur dans un NOUVEAU dossier</b> (aucune séance existante n'est modifiée), dans un terminal ouvert dans <code>lidar_lab</code> :<br>
+<code>node serveur_robot/serveur.js --dossier "C:\Users\HP\TP-cartographie\data\essai_exploration_AAAA-MM-JJ"</code><br>
+puis ouvrir <code>http://localhost:8000</code> sur le PC.</li>
+<li><b>Vérifier</b> que le robot est « en ligne » et que l'aperçu lidar s'affiche. <b>Regarder l'aperçu tout près du robot</b> : le 10/11, le lidar voyait une partie du robot à environ <b>11 cm, à l'avant droit</b> (secteur 300–340°). L'explorateur ignore maintenant ces points-là seulement. Noter s'ils sont présents, et s'il y a d'autres points très proches ailleurs (ceux-là bloquent l'exploration). Si possible, photographier ce qui dépasse à l'avant droit du lidar.</li>
+<li><b>Essai A — 1 pas (étalonnage).</b> Robot au centre de la zone dégagée, au moins 1,5 m libre devant. Dans « Exploration automatique » : <b>Pas maximum = 1</b>, <b>Vitesse estimée = 0,25</b>. Lancer. Le robot prend un premier scan, pivote éventuellement, avance d'un pas, s'arrête et recale. Relever « déplacement mesuré par le lidar » et « visé ».<br>
+<i>Si le robot n'a presque pas bougé (moins de 5 cm), la consigne de 35 % est trop faible : arrêter et noter.</i></li>
+<li><b>Correction de la vitesse estimée</b> (une seule fois) : <b>nouvelle vitesse = 0,25 × mesuré ÷ visé</b>. Exemple : 46 cm mesurés pour 35 cm visés → 0,25 × 46 ÷ 35 = 0,33 m/s. Le logiciel accepte de 0,10 à 0,60 m/s ; au-delà de 0,60 : arrêter (robot trop rapide pour des pas courts).</li>
+<li><b>Essai B — 3 pas</b>, vitesse corrigée, même zone. Vérifier les critères 1 à 4.</li>
+<li><b>Essai C — 10 à 20 pas</b>, seulement si l'essai B respecte tous les critères. Le robot peut alors s'approcher des meubles : rester à côté.</li>
+<li><b>Recoins</b> : si la sortie est derrière lui, le robot fait maintenant <b>demi-tour</b> (mode « demi-tour » dans le journal ; jamais essayé sur le vrai robot). Surveiller un éventuel <b>aller-retour</b> vers le même recoin : le noter et arrêter. S'il est entouré de tous côtés, il s'arrête sur « aucune direction libre autour du robot » : le dégager à la main, puis relancer. Un arrêt sur « plus de zone inconnue accessible » alors que la salle n'est pas finie est à noter : ce ne devrait plus arriver.</li>
+<li><b>À la fin</b> : exporter la grid map depuis Lidar Lab, prendre une photo de la zone, et conserver le dossier de la séance (scans, poses, journal). Ne pas supprimer les essais ratés.</li>
+</ol>
+
+<h2>4. Relevés</h2>
+<p>Vitesse estimée utilisée — essai A : <b>0,25</b> m/s · après correction : .......... m/s (calcul : 0,25 × ...... ÷ ...... )</p>
+<table>
+<tr><th style="width:8%">Essai</th><th style="width:6%">Pas</th><th style="width:11%">Visé (cm)</th><th style="width:13%">Mesuré lidar (cm)</th><th style="width:12%">Mètre ruban (cm, facultatif)</th><th style="width:9%">Recalé ?</th><th style="width:9%">STOP pressé ?</th><th>Remarques (obstacle, rotation, à-coups…)</th></tr>
+<tr><td>A</td><td>1</td><td class="v"></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>B</td><td>1</td><td class="v"></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>B</td><td>2</td><td class="v"></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>B</td><td>3</td><td class="v"></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>C</td><td>1</td><td class="v"></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>C</td><td>2</td><td class="v"></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>C</td><td>3</td><td class="v"></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>C</td><td>4</td><td class="v"></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>C</td><td>5</td><td class="v"></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>C</td><td>…</td><td class="v"></td><td></td><td></td><td></td><td></td><td></td></tr>
+</table>
+<table>
+<tr><th style="width:12%">Essai</th><th style="width:36%">Message de fin affiché</th><th style="width:22%">Critères 1 / 2 / 3 / 4 atteints ?</th><th>Commentaire</th></tr>
+<tr><td>A</td><td class="v"></td><td></td><td></td></tr>
+<tr><td>B</td><td class="v"></td><td></td><td></td></tr>
+<tr><td>C</td><td class="v"></td><td></td><td></td></tr>
+</table>
+<div class="info"><b>Ce que fait le logiciel à chaque pas</b> (pour comprendre ce qu'on observe) : scan robot à l'arrêt → choix de la frontière la plus proche (cellule libre voisine de l'inconnu) et du chemin sur la grille avec 25 cm de marge → rotation sur place → contrôle de l'avant, robot à l'arrêt (libre ≥ pas + 35 cm) → avance de 35 cm au plus sans lire le lidar → arrêt → capture et recalage sur la carte. Deux recalages refusés de suite : arrêt « position perdue ».</div>
+</body></html>
