@@ -1,0 +1,367 @@
+{
+ "seance": "04/11",
+ "scans": 35,
+ "arrets_a_tort_avant": 4,
+ "arrets_a_tort_apres": 4,
+ "points_proches_total": 3,
+ "points_proches_dans_secteur": 0,
+ "V2_part_secteur": "non mesurable",
+ "V3_part_ignoree_max": 0,
+ "criteres": {
+  "V1": "non atteint",
+  "V2": "non mesurable",
+  "V3": "atteint"
+ },
+ "par_scan": [
+  {
+   "k": 1,
+   "scan": "scan_01_19h20m09.csv",
+   "chemin_existe": true,
+   "sans_masque": "aucune",
+   "avec_masque": "aucune",
+   "points": 311,
+   "ignores": 0,
+   "part_ignoree": 0
+  },
+  {
+   "k": 2,
+   "scan": "scan_02_19h24m06.csv",
+   "chemin_existe": true,
+   "sans_masque": "chemin",
+   "avec_masque": "chemin",
+   "points": 308,
+   "ignores": 0,
+   "part_ignoree": 0
+  },
+  {
+   "k": 3,
+   "scan": "scan_03_19h24m30.csv",
+   "chemin_existe": true,
+   "sans_masque": "chemin",
+   "avec_masque": "chemin",
+   "points": 309,
+   "ignores": 0,
+   "part_ignoree": 0
+  },
+  {
+   "k": 4,
+   "scan": "scan_04_19h24m33.csv",
+   "chemin_existe": true,
+   "sans_masque": "chemin",
+   "avec_masque": "chemin",
+   "points": 311,
+   "ignores": 0,
+   "part_ignoree": 0
+  },
+  {
+   "k": 5,
+   "scan": "scan_05_19h25m06.csv",
+   "chemin_existe": true,
+   "sans_masque": "chemin",
+   "avec_masque": "chemin",
+   "points": 314,
+   "ignores": 0,
+   "part_ignoree": 0
+  },
+  {
+   "k": 6,
+   "scan": "scan_06_19h25m27.csv",
+   "chemin_existe": true,
+   "sans_masque": "chemin",
+   "avec_masque": "chemin",
+   "points": 311,
+   "ignores": 0,
+   "part_ignoree": 0
+  },
+  {
+   "k": 7,
+   "scan": "scan_07_19h25m53.csv",
+   "chemin_existe": true,
+   "sans_masque": "contournement",
+   "avec_masque": "contournement",
+   "points": 316,
+   "ignores": 0,
+   "part_ignoree": 0
+  },
+  {
+   "k": 8,
+   "scan": "scan_08_19h26m00.csv",
+   "chemin_existe": true,
+   "sans_masque": "contournement",
+   "avec_masque": "contournement",
+   "points": 313,
+   "ignores": 0,
+   "part_ignoree": 0
+  },
+  {
+   "k": 9,
+   "scan": "scan_09_19h26m04.csv",
+   "chemin_existe": true,
+   "sans_masque": "aucune",
+   "avec_masque": "aucune",
+   "points": 317,
+   "ignores": 0,
+   "part_ignoree": 0
+  },
+  {
+   "k": 10,
+   "scan": "scan_10_19h26m07.csv",
+   "chemin_existe": true,
+   "sans_masque": "aucune",
+   "avec_masque": "aucune",
+   "points": 317,
+   "ignores": 0,
+   "part_ignoree": 0
+  },
+  {
+   "k": 11,
+   "scan": "scan_11_19h26m11.csv",
+   "chemin_existe": true,
+   "sans_masque": "aucune",
+   "avec_masque": "aucune",
+   "points": 318,
+   "ignores": 0,
+   "part_ignoree": 0
+  },
+  {
+   "k": 12,
+   "scan": "scan_12_19h26m14.csv",
+   "chemin_existe": true,
+   "sans_masque": "contournement",
+   "avec_masque": "contournement",
+   "points": 316,
+   "ignores": 0,
+   "part_ignoree": 0
+  },
+  {
+   "k": 13,
+   "scan": "scan_13_19h26m17.csv",
+   "chemin_existe": true,
+   "sans_masque": "chemin",
+   "avec_masque": "chemin",
+   "points": 316,
+   "ignores": 0,
+   "part_ignoree": 0
+  },
+  {
+   "k": 14,
+   "scan": "scan_14_19h26m23.csv",
+   "chemin_existe": true,
+   "sans_masque": "chemin",
+   "avec_masque": "chemin",
+   "points": 316,
+   "ignores": 0,
+   "part_ignoree": 0
+  },
+  {
+   "k": 15,
+   "scan": "scan_15_19h26m26.csv",
+   "chemin_existe": true,
+   "sans_masque": "chemin",
+   "avec_masque": "chemin",
+   "points": 318,
+   "ignores": 0,
+   "part_ignoree": 0
+  },
+  {
+   "k": 16,
+   "scan": "scan_16_19h26m29.csv",
+   "chemin_existe": true,
+   "sans_masque": "chemin",
+   "avec_masque": "chemin",
+   "points": 316,
+   "ignores": 0,
+   "part_ignoree": 0
+  },
+  {
+   "k": 17,
+   "scan": "scan_17_19h26m39.csv",
+   "chemin_existe": true,
+   "sans_masque": "chemin",
+   "avec_masque": "chemin",
+   "points": 317,
+   "ignores": 0,
+   "part_ignoree": 0
+  },
+  {
+   "k": 18,
+   "scan": "scan_18_19h26m57.csv",
+   "chemin_existe": true,
+   "sans_masque": "chemin",
+   "avec_masque": "chemin",
+   "points": 316,
+   "ignores": 0,
+   "part_ignoree": 0
+  },
+  {
+   "k": 19,
+   "scan": "scan_19_19h27m13.csv",
+   "chemin_existe": true,
+   "sans_masque": "chemin",
+   "avec_masque": "chemin",
+   "points": 313,
+   "ignores": 0,
+   "part_ignoree": 0
+  },
+  {
+   "k": 20,
+   "scan": "scan_20_19h27m40.csv",
+   "chemin_existe": true,
+   "sans_masque": "chemin",
+   "avec_masque": "chemin",
+   "points": 310,
+   "ignores": 0,
+   "part_ignoree": 0
+  },
+  {
+   "k": 21,
+   "scan": "scan_21_19h28m03.csv",
+   "chemin_existe": true,
+   "sans_masque": "chemin",
+   "avec_masque": "chemin",
+   "points": 306,
+   "ignores": 0,
+   "part_ignoree": 0
+  },
+  {
+   "k": 22,
+   "scan": "scan_22_19h28m07.csv",
+   "chemin_existe": true,
+   "sans_masque": "chemin",
+   "avec_masque": "chemin",
+   "points": 308,
+   "ignores": 0,
+   "part_ignoree": 0
+  },
+  {
+   "k": 23,
+   "scan": "scan_23_19h28m11.csv",
+   "chemin_existe": true,
+   "sans_masque": "chemin",
+   "avec_masque": "chemin",
+   "points": 308,
+   "ignores": 0,
+   "part_ignoree": 0
+  },
+  {
+   "k": 24,
+   "scan": "scan_24_19h28m15.csv",
+   "chemin_existe": true,
+   "sans_masque": "chemin",
+   "avec_masque": "chemin",
+   "points": 312,
+   "ignores": 0,
+   "part_ignoree": 0
+  },
+  {
+   "k": 25,
+   "scan": "scan_25_19h28m18.csv",
+   "chemin_existe": true,
+   "sans_masque": "chemin",
+   "avec_masque": "chemin",
+   "points": 310,
+   "ignores": 0,
+   "part_ignoree": 0
+  },
+  {
+   "k": 26,
+   "scan": "scan_26_19h28m46.csv",
+   "chemin_existe": true,
+   "sans_masque": "chemin",
+   "avec_masque": "chemin",
+   "points": 312,
+   "ignores": 0,
+   "part_ignoree": 0
+  },
+  {
+   "k": 27,
+   "scan": "scan_28_19h30m00.csv",
+   "chemin_existe": true,
+   "sans_masque": "chemin",
+   "avec_masque": "chemin",
+   "points": 311,
+   "ignores": 0,
+   "part_ignoree": 0
+  },
+  {
+   "k": 28,
+   "scan": "scan_33_19h31m56.csv",
+   "chemin_existe": true,
+   "sans_masque": "chemin",
+   "avec_masque": "chemin",
+   "points": 310,
+   "ignores": 0,
+   "part_ignoree": 0
+  },
+  {
+   "k": 29,
+   "scan": "scan_34_19h32m16.csv",
+   "chemin_existe": true,
+   "sans_masque": "chemin",
+   "avec_masque": "chemin",
+   "points": 308,
+   "ignores": 0,
+   "part_ignoree": 0
+  },
+  {
+   "k": 30,
+   "scan": "scan_35_19h32m34.csv",
+   "chemin_existe": true,
+   "sans_masque": "chemin",
+   "avec_masque": "chemin",
+   "points": 307,
+   "ignores": 0,
+   "part_ignoree": 0
+  },
+  {
+   "k": 31,
+   "scan": "scan_36_19h32m52.csv",
+   "chemin_existe": true,
+   "sans_masque": "chemin",
+   "avec_masque": "chemin",
+   "points": 298,
+   "ignores": 0,
+   "part_ignoree": 0
+  },
+  {
+   "k": 32,
+   "scan": "scan_37_19h33m40.csv",
+   "chemin_existe": true,
+   "sans_masque": "chemin",
+   "avec_masque": "chemin",
+   "points": 293,
+   "ignores": 0,
+   "part_ignoree": 0
+  },
+  {
+   "k": 33,
+   "scan": "scan_38_19h33m54.csv",
+   "chemin_existe": true,
+   "sans_masque": "chemin",
+   "avec_masque": "chemin",
+   "points": 298,
+   "ignores": 0,
+   "part_ignoree": 0
+  },
+  {
+   "k": 34,
+   "scan": "scan_39_19h34m10.csv",
+   "chemin_existe": true,
+   "sans_masque": "chemin",
+   "avec_masque": "chemin",
+   "points": 302,
+   "ignores": 0,
+   "part_ignoree": 0
+  },
+  {
+   "k": 35,
+   "scan": "scan_40_19h35m03.csv",
+   "chemin_existe": true,
+   "sans_masque": "chemin",
+   "avec_masque": "chemin",
+   "points": 304,
+   "ignores": 0,
+   "part_ignoree": 0
+  }
+ ]
+}

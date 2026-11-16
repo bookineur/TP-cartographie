@@ -8,11 +8,11 @@ const E = require(path.join(CODEX, "serveur_robot", "exploration.js"));
 const DATA = path.join(__dirname, "..", "..", "data", "mesures_phase19_2026-11-09");
 const SEANCE = path.join(DATA, "capture", "seance_2026-11-09_13h06m10");
 
-function loadSeance() {
-  const s = JSON.parse(fs.readFileSync(path.join(SEANCE, "seance.json"), "utf8"));
+function loadSeance(dir = SEANCE) {
+  const s = JSON.parse(fs.readFileSync(path.join(dir, "seance.json"), "utf8"));
   const f = { minRange: s.settings.rmin, maxRange: s.settings.rmax, minIntensity: s.settings.imin };
   const all = s.scans.map((e) => {
-    const sc = LC.parseCsv(fs.readFileSync(path.join(SEANCE, e.name), "utf8"), e.name);
+    const sc = LC.parseCsv(fs.readFileSync(path.join(dir, e.name), "utf8"), e.name);
     sc.pose = e.pose;
     sc.mapRegistered = sc.visible = !!e.reg;
     return sc;
