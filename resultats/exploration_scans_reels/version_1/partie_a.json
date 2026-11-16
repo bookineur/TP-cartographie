@@ -1,0 +1,842 @@
+[
+ {
+  "scan": "scan_01_13h31m26.csv",
+  "k": 1,
+  "pose": [
+   0,
+   0,
+   0
+  ],
+  "temps_ms": 4,
+  "mode": "chemin",
+  "turnDeg": 130,
+  "pas": 0.35,
+  "degagement_scan": 1.48,
+  "bloque": false,
+  "points_zone_balayee": 0,
+  "obstacle_carte_complete": 1.5,
+  "decision": "sûre"
+ },
+ {
+  "scan": "scan_02_13h31m33.csv",
+  "k": 2,
+  "pose": [
+   0,
+   0,
+   0
+  ],
+  "temps_ms": 1,
+  "mode": "chemin",
+  "turnDeg": 135,
+  "pas": 0.35,
+  "degagement_scan": 1.418,
+  "bloque": false,
+  "points_zone_balayee": 0,
+  "obstacle_carte_complete": 1.411,
+  "decision": "sûre"
+ },
+ {
+  "scan": "scan_03_13h31m37.csv",
+  "k": 3,
+  "pose": [
+   0,
+   0,
+   0
+  ],
+  "temps_ms": 0,
+  "mode": "chemin",
+  "turnDeg": 135,
+  "pas": 0.35,
+  "degagement_scan": 1.419,
+  "bloque": false,
+  "points_zone_balayee": 0,
+  "obstacle_carte_complete": 1.411,
+  "decision": "sûre"
+ },
+ {
+  "scan": "scan_04_13h34m27.csv",
+  "k": 4,
+  "pose": [
+   -0.05,
+   0.15,
+   81
+  ],
+  "temps_ms": 2,
+  "mode": "chemin",
+  "turnDeg": 134,
+  "pas": 0.35,
+  "degagement_scan": 1.431,
+  "bloque": false,
+  "points_zone_balayee": 35,
+  "obstacle_carte_complete": 0.44,
+  "decision": "dangereuse"
+ },
+ {
+  "scan": "scan_05_13h34m32.csv",
+  "k": 5,
+  "pose": [
+   -0.05,
+   0.15,
+   81
+  ],
+  "temps_ms": 1,
+  "mode": "chemin",
+  "turnDeg": 142,
+  "pas": 0.35,
+  "degagement_scan": 3.088,
+  "bloque": false,
+  "points_zone_balayee": 41,
+  "obstacle_carte_complete": 0.448,
+  "decision": "dangereuse"
+ },
+ {
+  "scan": "scan_06_13h34m36.csv",
+  "k": 6,
+  "pose": [
+   -0.05,
+   0.15,
+   81
+  ],
+  "temps_ms": 1,
+  "mode": "chemin",
+  "turnDeg": 142,
+  "pas": 0.35,
+  "degagement_scan": 3.088,
+  "bloque": false,
+  "points_zone_balayee": 41,
+  "obstacle_carte_complete": 0.448,
+  "decision": "dangereuse"
+ },
+ {
+  "scan": "scan_07_13h35m01.csv",
+  "k": 7,
+  "pose": [
+   0.24,
+   1.49,
+   96
+  ],
+  "temps_ms": 7,
+  "mode": "direction",
+  "turnDeg": 150,
+  "pas": 0.35,
+  "degagement_scan": 1.684,
+  "bloque": false,
+  "points_zone_balayee": 0,
+  "obstacle_carte_complete": 1.689,
+  "decision": "sûre"
+ },
+ {
+  "scan": "scan_08_13h36m01.csv",
+  "k": 8,
+  "pose": [
+   -0.41,
+   2.34,
+   165.5
+  ],
+  "temps_ms": 10,
+  "mode": "direction",
+  "turnDeg": 90,
+  "pas": 0.35,
+  "degagement_scan": 4.601,
+  "bloque": false,
+  "points_zone_balayee": 0,
+  "obstacle_carte_complete": 1.017,
+  "decision": "sûre"
+ },
+ {
+  "scan": "scan_09_13h36m20.csv",
+  "k": 9,
+  "pose": [
+   -0.41,
+   2.34,
+   166
+  ],
+  "temps_ms": 4,
+  "mode": "aucune",
+  "decision": "terminé"
+ },
+ {
+  "scan": "scan_10_13h37m35.csv",
+  "k": 10,
+  "pose": [
+   -1.535,
+   2.79,
+   171
+  ],
+  "temps_ms": 2,
+  "mode": "contournement",
+  "turnDeg": -150,
+  "pas": 0.35,
+  "degagement_scan": 1.779,
+  "bloque": false,
+  "points_zone_balayee": 11,
+  "obstacle_carte_complete": 0.285,
+  "decision": "dangereuse"
+ },
+ {
+  "scan": "scan_11_13h38m04.csv",
+  "k": 11,
+  "pose": [
+   -2.485,
+   3.215,
+   171
+  ],
+  "temps_ms": 2,
+  "mode": "contournement",
+  "turnDeg": -150,
+  "pas": 0.35,
+  "degagement_scan": 1.341,
+  "bloque": false,
+  "points_zone_balayee": 1,
+  "obstacle_carte_complete": 0.204,
+  "decision": "sûre"
+ },
+ {
+  "scan": "scan_12_13h38m38.csv",
+  "k": 12,
+  "pose": [
+   -3.335,
+   3.165,
+   164.5
+  ],
+  "temps_ms": 5,
+  "mode": "direction",
+  "turnDeg": 90,
+  "pas": 0.35,
+  "degagement_scan": 4.549,
+  "bloque": false,
+  "points_zone_balayee": 0,
+  "obstacle_carte_complete": 0.549,
+  "decision": "sûre"
+ },
+ {
+  "scan": "scan_13_13h39m09.csv",
+  "k": 13,
+  "pose": [
+   -4.135,
+   2.965,
+   166.5
+  ],
+  "temps_ms": 3,
+  "mode": "contournement",
+  "turnDeg": -150,
+  "pas": 0.35,
+  "degagement_scan": 1.071,
+  "bloque": false,
+  "points_zone_balayee": 0,
+  "obstacle_carte_complete": 0.753,
+  "decision": "sûre"
+ },
+ {
+  "scan": "scan_14_13h39m44.csv",
+  "k": 14,
+  "pose": [
+   -4.485,
+   1.94,
+   174.5
+  ],
+  "temps_ms": 2,
+  "mode": "contournement",
+  "turnDeg": 60,
+  "pas": 0.35,
+  "degagement_scan": 3.191,
+  "bloque": false,
+  "points_zone_balayee": 5,
+  "obstacle_carte_complete": 0.379,
+  "decision": "dangereuse"
+ },
+ {
+  "scan": "scan_15_13h40m07.csv",
+  "k": 15,
+  "pose": [
+   -4.685,
+   1.04,
+   177
+  ],
+  "temps_ms": 1,
+  "mode": "chemin",
+  "turnDeg": 147,
+  "pas": 0.35,
+  "degagement_scan": 6.763,
+  "bloque": false,
+  "points_zone_balayee": 0,
+  "obstacle_carte_complete": 0.579,
+  "decision": "sûre"
+ },
+ {
+  "scan": "scan_16_13h40m35.csv",
+  "k": 16,
+  "pose": [
+   -4.685,
+   1.04,
+   177
+  ],
+  "temps_ms": 2,
+  "mode": "chemin",
+  "turnDeg": 147,
+  "pas": 0.35,
+  "degagement_scan": 6.795,
+  "bloque": false,
+  "points_zone_balayee": 0,
+  "obstacle_carte_complete": 0.579,
+  "decision": "sûre"
+ },
+ {
+  "scan": "scan_17_13h40m55.csv",
+  "k": 17,
+  "pose": [
+   -4.685,
+   0.09,
+   172
+  ],
+  "temps_ms": 2,
+  "mode": "chemin",
+  "turnDeg": 73,
+  "pas": 0.35,
+  "degagement_scan": 2.565,
+  "bloque": false,
+  "points_zone_balayee": 6,
+  "obstacle_carte_complete": 0.166,
+  "decision": "dangereuse"
+ },
+ {
+  "scan": "scan_18_13h41m51.csv",
+  "k": 18,
+  "pose": [
+   -3.86,
+   -0.56,
+   174.5
+  ],
+  "temps_ms": 1,
+  "mode": "chemin",
+  "turnDeg": 145,
+  "pas": 0.35,
+  "degagement_scan": 1.817,
+  "bloque": false,
+  "points_zone_balayee": 3,
+  "obstacle_carte_complete": 0.006,
+  "decision": "dangereuse"
+ },
+ {
+  "scan": "scan_19_13h42m19.csv",
+  "k": 19,
+  "pose": [
+   -3.035,
+   -0.71,
+   170.5
+  ],
+  "temps_ms": 3,
+  "mode": "contournement",
+  "turnDeg": 90,
+  "pas": 0.35,
+  "degagement_scan": 1.058,
+  "bloque": false,
+  "points_zone_balayee": 0,
+  "obstacle_carte_complete": 0.557,
+  "decision": "sûre"
+ },
+ {
+  "scan": "scan_20_13h42m48.csv",
+  "k": 20,
+  "pose": [
+   -1.86,
+   -1.185,
+   164
+  ],
+  "temps_ms": 1,
+  "mode": "chemin",
+  "turnDeg": -169,
+  "pas": 0.35,
+  "degagement_scan": 2.013,
+  "bloque": false,
+  "points_zone_balayee": 0,
+  "obstacle_carte_complete": 1.942,
+  "decision": "sûre"
+ },
+ {
+  "scan": "scan_21_13h43m13.csv",
+  "k": 21,
+  "pose": [
+   -0.76,
+   -1.085,
+   168
+  ],
+  "temps_ms": 4,
+  "mode": "chemin",
+  "turnDeg": -77,
+  "pas": 0.35,
+  "degagement_scan": 5.771,
+  "bloque": false,
+  "points_zone_balayee": 0,
+  "obstacle_carte_complete": 1.125,
+  "decision": "sûre"
+ },
+ {
+  "scan": "scan_22_13h43m40.csv",
+  "k": 22,
+  "pose": [
+   -0.185,
+   -0.26,
+   177.5
+  ],
+  "temps_ms": 3,
+  "mode": "chemin",
+  "turnDeg": 3,
+  "pas": 0.35,
+  "degagement_scan": 1.053,
+  "bloque": false,
+  "points_zone_balayee": 59,
+  "obstacle_carte_complete": 0.138,
+  "decision": "dangereuse"
+ },
+ {
+  "scan": "scan_23_13h44m20.csv",
+  "k": 23,
+  "pose": [
+   -3.985,
+   3.515,
+   176
+  ],
+  "temps_ms": 1,
+  "mode": "contournement",
+  "turnDeg": -150,
+  "pas": 0.35,
+  "degagement_scan": 1.201,
+  "bloque": false,
+  "points_zone_balayee": 16,
+  "obstacle_carte_complete": 0.067,
+  "decision": "dangereuse"
+ },
+ {
+  "scan": "scan_24_13h44m40.csv",
+  "k": 24,
+  "pose": [
+   -4.76,
+   4.115,
+   171
+  ],
+  "temps_ms": 1,
+  "mode": "contournement",
+  "turnDeg": 60,
+  "pas": 0.35,
+  "degagement_scan": 1.285,
+  "bloque": false,
+  "points_zone_balayee": 13,
+  "obstacle_carte_complete": 0.129,
+  "decision": "dangereuse"
+ },
+ {
+  "scan": "scan_25_13h45m45.csv",
+  "k": 25,
+  "pose": [
+   -6.035,
+   5.165,
+   175
+  ],
+  "temps_ms": 1,
+  "mode": "chemin",
+  "turnDeg": -21,
+  "pas": 0.35,
+  "degagement_scan": 4.676,
+  "bloque": false,
+  "points_zone_balayee": 3,
+  "obstacle_carte_complete": 0.454,
+  "decision": "dangereuse"
+ },
+ {
+  "scan": "scan_26_13h46m06.csv",
+  "k": 26,
+  "pose": [
+   -7.385,
+   5.665,
+   176.5
+  ],
+  "temps_ms": 1,
+  "mode": "contournement",
+  "turnDeg": -90,
+  "pas": 0.35,
+  "degagement_scan": 2.459,
+  "bloque": false,
+  "points_zone_balayee": 14,
+  "obstacle_carte_complete": 0.018,
+  "decision": "dangereuse"
+ },
+ {
+  "scan": "scan_27_13h46m30.csv",
+  "k": 27,
+  "pose": [
+   -8.135,
+   6.14,
+   166.5
+  ],
+  "temps_ms": 2,
+  "mode": "contournement",
+  "turnDeg": -120,
+  "pas": 0.35,
+  "degagement_scan": 2.41,
+  "bloque": false,
+  "points_zone_balayee": 5,
+  "obstacle_carte_complete": 0.353,
+  "decision": "dangereuse"
+ },
+ {
+  "scan": "scan_28_13h46m56.csv",
+  "k": 28,
+  "pose": [
+   -9.11,
+   6.44,
+   168
+  ],
+  "temps_ms": 1,
+  "mode": "chemin",
+  "turnDeg": -77,
+  "pas": 0.35,
+  "degagement_scan": 2.005,
+  "bloque": false,
+  "points_zone_balayee": 6,
+  "obstacle_carte_complete": 0.062,
+  "decision": "dangereuse"
+ },
+ {
+  "scan": "scan_29_13h47m35.csv",
+  "k": 29,
+  "pose": [
+   -9.81,
+   6.565,
+   171.5
+  ],
+  "temps_ms": 2,
+  "mode": "contournement",
+  "turnDeg": -150,
+  "pas": 0.35,
+  "degagement_scan": 0.991,
+  "bloque": false,
+  "points_zone_balayee": 0,
+  "obstacle_carte_complete": 1.419,
+  "decision": "sûre"
+ },
+ {
+  "scan": "scan_30_13h47m57.csv",
+  "k": 30,
+  "pose": [
+   -9.785,
+   7.39,
+   178
+  ],
+  "temps_ms": 2,
+  "mode": "chemin",
+  "turnDeg": -179,
+  "pas": 0.35,
+  "degagement_scan": 4.749,
+  "bloque": false,
+  "points_zone_balayee": 5,
+  "obstacle_carte_complete": 0.026,
+  "decision": "dangereuse"
+ },
+ {
+  "scan": "scan_31_13h48m27.csv",
+  "k": 31,
+  "pose": [
+   -9.035,
+   7.165,
+   179
+  ],
+  "temps_ms": 2,
+  "mode": "chemin",
+  "turnDeg": -178,
+  "pas": 0.35,
+  "degagement_scan": 2.8,
+  "bloque": false,
+  "points_zone_balayee": 0,
+  "obstacle_carte_complete": 1.555,
+  "decision": "sûre"
+ },
+ {
+  "scan": "scan_32_13h48m47.csv",
+  "k": 32,
+  "pose": [
+   -8.135,
+   7.09,
+   170
+  ],
+  "temps_ms": 3,
+  "mode": "chemin",
+  "turnDeg": -171,
+  "pas": 0.35,
+  "degagement_scan": 1.921,
+  "bloque": false,
+  "points_zone_balayee": 0,
+  "obstacle_carte_complete": 1.902,
+  "decision": "sûre"
+ },
+ {
+  "scan": "scan_33_13h49m15.csv",
+  "k": 33,
+  "pose": [
+   -7.185,
+   7.065,
+   169.5
+  ],
+  "temps_ms": 3,
+  "mode": "chemin",
+  "turnDeg": 87,
+  "pas": 0.35,
+  "degagement_scan": 2.304,
+  "bloque": false,
+  "points_zone_balayee": 0,
+  "obstacle_carte_complete": 0.852,
+  "decision": "sûre"
+ },
+ {
+  "scan": "scan_34_13h49m45.csv",
+  "k": 34,
+  "pose": [
+   -6.335,
+   7.29,
+   179
+  ],
+  "temps_ms": 2,
+  "mode": "chemin",
+  "turnDeg": 35,
+  "pas": 0.35,
+  "degagement_scan": 3.683,
+  "bloque": false,
+  "points_zone_balayee": 0,
+  "obstacle_carte_complete": 3.629,
+  "decision": "sûre"
+ },
+ {
+  "scan": "scan_35_13h50m06.csv",
+  "k": 35,
+  "pose": [
+   -5.71,
+   7.065,
+   175
+  ],
+  "temps_ms": 2,
+  "mode": "contournement",
+  "turnDeg": 0,
+  "pas": 0.35,
+  "degagement_scan": 4.502,
+  "bloque": false,
+  "points_zone_balayee": 5,
+  "obstacle_carte_complete": 0.087,
+  "decision": "dangereuse"
+ },
+ {
+  "scan": "scan_36_13h50m43.csv",
+  "k": 36,
+  "pose": [
+   -5,
+   0,
+   171
+  ],
+  "temps_ms": 2,
+  "mode": "contournement",
+  "turnDeg": 60,
+  "pas": 0.35,
+  "degagement_scan": 1.091,
+  "bloque": false,
+  "points_zone_balayee": 0,
+  "obstacle_carte_complete": 0.905,
+  "decision": "sûre"
+ },
+ {
+  "scan": "scan_37_13h51m14.csv",
+  "k": 37,
+  "pose": [
+   -5.835,
+   -0.235,
+   163.5
+  ],
+  "temps_ms": 1,
+  "mode": "contournement",
+  "turnDeg": 90,
+  "pas": 0.35,
+  "degagement_scan": 1.958,
+  "bloque": false,
+  "points_zone_balayee": 2,
+  "obstacle_carte_complete": 0.445,
+  "decision": "sûre"
+ },
+ {
+  "scan": "scan_38_13h51m37.csv",
+  "k": 38,
+  "pose": [
+   -6.135,
+   -0.96,
+   167
+  ],
+  "temps_ms": 8,
+  "mode": "direction",
+  "turnDeg": 150,
+  "pas": 0.35,
+  "degagement_scan": 1.242,
+  "bloque": false,
+  "points_zone_balayee": 0,
+  "obstacle_carte_complete": 0.861,
+  "decision": "sûre"
+ },
+ {
+  "scan": "scan_39_13h52m03.csv",
+  "k": 39,
+  "pose": [
+   -6.41,
+   -1.635,
+   169.5
+  ],
+  "temps_ms": 4,
+  "mode": "aucune",
+  "decision": "terminé"
+ },
+ {
+  "scan": "scan_40_13h52m29.csv",
+  "k": 40,
+  "pose": [
+   -7.01,
+   -1.51,
+   164
+  ],
+  "temps_ms": 1,
+  "mode": "aucune",
+  "decision": "terminé"
+ },
+ {
+  "scan": "scan_41_13h53m03.csv",
+  "k": 41,
+  "pose": [
+   -4.86,
+   -1.085,
+   175.5
+  ],
+  "temps_ms": 3,
+  "mode": "aucune",
+  "decision": "terminé"
+ },
+ {
+  "scan": "scan_42_13h54m09.csv",
+  "k": 42,
+  "pose": [
+   -4.885,
+   -1.46,
+   165.5
+  ],
+  "temps_ms": 3,
+  "mode": "contournement",
+  "turnDeg": -120,
+  "pas": 0.35,
+  "degagement_scan": null,
+  "bloque": false,
+  "points_zone_balayee": 122,
+  "obstacle_carte_complete": 0.153,
+  "decision": "dangereuse"
+ },
+ {
+  "scan": "scan_43_13h54m44.csv",
+  "k": 43,
+  "pose": [
+   -5.01,
+   -1.66,
+   170.5
+  ],
+  "temps_ms": 3,
+  "mode": "contournement",
+  "turnDeg": -120,
+  "pas": 0.35,
+  "degagement_scan": null,
+  "bloque": false,
+  "points_zone_balayee": 48,
+  "obstacle_carte_complete": 0.01,
+  "decision": "dangereuse"
+ },
+ {
+  "scan": "scan_44_13h56m02.csv",
+  "k": 44,
+  "pose": [
+   -9.46,
+   -0.285,
+   -177
+  ],
+  "temps_ms": 2,
+  "mode": "contournement",
+  "turnDeg": -150,
+  "pas": 0.35,
+  "degagement_scan": null,
+  "bloque": false,
+  "points_zone_balayee": 11,
+  "obstacle_carte_complete": 0.088,
+  "decision": "dangereuse"
+ },
+ {
+  "scan": "scan_45_13h56m29.csv",
+  "k": 45,
+  "pose": [
+   -9.36,
+   -0.16,
+   -176.5
+  ],
+  "temps_ms": 2,
+  "mode": "contournement",
+  "turnDeg": -150,
+  "pas": 0.35,
+  "degagement_scan": null,
+  "bloque": false,
+  "points_zone_balayee": 2,
+  "obstacle_carte_complete": 0.171,
+  "decision": "sûre"
+ },
+ {
+  "scan": "scan_47_13h58m04.csv",
+  "k": 46,
+  "pose": [
+   -9.76,
+   3.84,
+   173
+  ],
+  "temps_ms": 4,
+  "mode": "chemin",
+  "turnDeg": 96,
+  "pas": 0.35,
+  "degagement_scan": 2.83,
+  "bloque": false,
+  "points_zone_balayee": 2,
+  "obstacle_carte_complete": 0.227,
+  "decision": "sûre"
+ },
+ {
+  "scan": "scan_48_13h59m11.csv",
+  "k": 47,
+  "pose": [
+   -10.41,
+   3.79,
+   169.5
+  ],
+  "temps_ms": 8,
+  "mode": "contournement",
+  "turnDeg": -120,
+  "pas": 0.35,
+  "degagement_scan": 5.459,
+  "bloque": false,
+  "points_zone_balayee": 7,
+  "obstacle_carte_complete": 0.181,
+  "decision": "dangereuse"
+ },
+ {
+  "scan": "scan_49_14h01m18.csv",
+  "k": 48,
+  "pose": [
+   -6.46,
+   4.565,
+   165.5
+  ],
+  "temps_ms": 3,
+  "mode": "contournement",
+  "turnDeg": 60,
+  "pas": 0.35,
+  "degagement_scan": 1.747,
+  "bloque": false,
+  "points_zone_balayee": 24,
+  "obstacle_carte_complete": 0.353,
+  "decision": "dangereuse"
+ }
+]

@@ -1,0 +1,149 @@
+[
+ {
+  "k": 4,
+  "scan": "scan_04_13h34m27.csv",
+  "points_avant": 35,
+  "points_sans_proches": 35,
+  "reste_dangereuse": true
+ },
+ {
+  "k": 5,
+  "scan": "scan_05_13h34m32.csv",
+  "points_avant": 41,
+  "points_sans_proches": 41,
+  "reste_dangereuse": true
+ },
+ {
+  "k": 6,
+  "scan": "scan_06_13h34m36.csv",
+  "points_avant": 41,
+  "points_sans_proches": 41,
+  "reste_dangereuse": true
+ },
+ {
+  "k": 10,
+  "scan": "scan_10_13h37m35.csv",
+  "points_avant": 11,
+  "points_sans_proches": 11,
+  "reste_dangereuse": true
+ },
+ {
+  "k": 14,
+  "scan": "scan_14_13h39m44.csv",
+  "points_avant": 5,
+  "points_sans_proches": 5,
+  "reste_dangereuse": true
+ },
+ {
+  "k": 17,
+  "scan": "scan_17_13h40m55.csv",
+  "points_avant": 6,
+  "points_sans_proches": 6,
+  "reste_dangereuse": true
+ },
+ {
+  "k": 18,
+  "scan": "scan_18_13h41m51.csv",
+  "points_avant": 3,
+  "points_sans_proches": 3,
+  "reste_dangereuse": true
+ },
+ {
+  "k": 22,
+  "scan": "scan_22_13h43m40.csv",
+  "points_avant": 59,
+  "points_sans_proches": 59,
+  "reste_dangereuse": true
+ },
+ {
+  "k": 23,
+  "scan": "scan_23_13h44m20.csv",
+  "points_avant": 16,
+  "points_sans_proches": 16,
+  "reste_dangereuse": true
+ },
+ {
+  "k": 24,
+  "scan": "scan_24_13h44m40.csv",
+  "points_avant": 13,
+  "points_sans_proches": 13,
+  "reste_dangereuse": true
+ },
+ {
+  "k": 25,
+  "scan": "scan_25_13h45m45.csv",
+  "points_avant": 3,
+  "points_sans_proches": 3,
+  "reste_dangereuse": true
+ },
+ {
+  "k": 26,
+  "scan": "scan_26_13h46m06.csv",
+  "points_avant": 14,
+  "points_sans_proches": 14,
+  "reste_dangereuse": true
+ },
+ {
+  "k": 27,
+  "scan": "scan_27_13h46m30.csv",
+  "points_avant": 5,
+  "points_sans_proches": 5,
+  "reste_dangereuse": true
+ },
+ {
+  "k": 28,
+  "scan": "scan_28_13h46m56.csv",
+  "points_avant": 6,
+  "points_sans_proches": 6,
+  "reste_dangereuse": true
+ },
+ {
+  "k": 30,
+  "scan": "scan_30_13h47m57.csv",
+  "points_avant": 5,
+  "points_sans_proches": 5,
+  "reste_dangereuse": true
+ },
+ {
+  "k": 35,
+  "scan": "scan_35_13h50m06.csv",
+  "points_avant": 5,
+  "points_sans_proches": 5,
+  "reste_dangereuse": true
+ },
+ {
+  "k": 42,
+  "scan": "scan_42_13h54m09.csv",
+  "points_avant": 122,
+  "points_sans_proches": 119,
+  "reste_dangereuse": true
+ },
+ {
+  "k": 43,
+  "scan": "scan_43_13h54m44.csv",
+  "points_avant": 48,
+  "points_sans_proches": 39,
+  "reste_dangereuse": true
+ },
+ {
+  "k": 44,
+  "scan": "scan_44_13h56m02.csv",
+  "points_avant": 11,
+  "points_sans_proches": 4,
+  "reste_dangereuse": true
+ },
+ {
+  "k": 47,
+  "scan": "scan_48_13h59m11.csv",
+  "points_avant": 7,
+  "points_sans_proches": 7,
+  "reste_dangereuse": true
+ },
+ {
+  "k": 48,
+  "scan": "scan_49_14h01m18.csv",
+  "points_avant": 24,
+  "points_sans_proches": 24,
+  "reste_dangereuse": true
+ }
+]
