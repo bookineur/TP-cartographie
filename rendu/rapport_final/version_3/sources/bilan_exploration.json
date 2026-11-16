@@ -1,0 +1,29 @@
+[
+ {
+  "graine": 11,
+  "scans": 53,
+  "distance_m": 18.4,
+  "erreur_max_cm": 6.5,
+  "collision": false,
+  "couverture": 0.953,
+  "statut": "terminé : plus de zone inconnue accessible"
+ },
+ {
+  "graine": 12,
+  "scans": 19,
+  "distance_m": 6.5,
+  "erreur_max_cm": 7.7,
+  "collision": false,
+  "couverture": 0.955,
+  "statut": "terminé : plus de zone inconnue accessible"
+ },
+ {
+  "graine": 13,
+  "scans": 17,
+  "distance_m": 6.3,
+  "erreur_max_cm": 4.4,
+  "collision": false,
+  "couverture": 0.949,
+  "statut": "terminé : plus de zone inconnue accessible"
+ }
+]
