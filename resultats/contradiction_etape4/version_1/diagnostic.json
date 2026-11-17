@@ -1,0 +1,1030 @@
+{
+ "04/11": {
+  "scans": 35,
+  "mediane": 0.0533,
+  "p90": 0.142,
+  "max": 0.3956,
+  "au_dessus_14_2": 3,
+  "points_vides_par_distance": {
+   "0-0.3 m": 3,
+   "0.3-1 m": 257,
+   "1-3 m": 440,
+   "3-6 m": 120,
+   "6-13 m": 15
+  },
+  "rows": [
+   {
+    "scan": "scan_01_19h20m09.csv",
+    "points": 316,
+    "part_vide": 0.0475,
+    "vide_par_distance": [
+     1,
+     2,
+     4,
+     8,
+     0
+    ]
+   },
+   {
+    "scan": "scan_02_19h24m06.csv",
+    "points": 318,
+    "part_vide": 0.0189,
+    "vide_par_distance": [
+     0,
+     0,
+     2,
+     4,
+     0
+    ]
+   },
+   {
+    "scan": "scan_03_19h24m30.csv",
+    "points": 318,
+    "part_vide": 0.0126,
+    "vide_par_distance": [
+     0,
+     0,
+     2,
+     2,
+     0
+    ]
+   },
+   {
+    "scan": "scan_04_19h24m33.csv",
+    "points": 318,
+    "part_vide": 0.0189,
+    "vide_par_distance": [
+     0,
+     0,
+     5,
+     0,
+     1
+    ]
+   },
+   {
+    "scan": "scan_05_19h25m06.csv",
+    "points": 316,
+    "part_vide": 0.0285,
+    "vide_par_distance": [
+     0,
+     0,
+     9,
+     0,
+     0
+    ]
+   },
+   {
+    "scan": "scan_06_19h25m27.csv",
+    "points": 318,
+    "part_vide": 0.0377,
+    "vide_par_distance": [
+     0,
+     0,
+     11,
+     1,
+     0
+    ]
+   },
+   {
+    "scan": "scan_07_19h25m53.csv",
+    "points": 319,
+    "part_vide": 0.0533,
+    "vide_par_distance": [
+     0,
+     6,
+     9,
+     2,
+     0
+    ]
+   },
+   {
+    "scan": "scan_08_19h26m00.csv",
+    "points": 318,
+    "part_vide": 0.044,
+    "vide_par_distance": [
+     0,
+     4,
+     10,
+     0,
+     0
+    ]
+   },
+   {
+    "scan": "scan_09_19h26m04.csv",
+    "points": 317,
+    "part_vide": 0.0252,
+    "vide_par_distance": [
+     0,
+     0,
+     8,
+     0,
+     0
+    ]
+   },
+   {
+    "scan": "scan_10_19h26m07.csv",
+    "points": 317,
+    "part_vide": 0.0252,
+    "vide_par_distance": [
+     0,
+     0,
+     7,
+     1,
+     0
+    ]
+   },
+   {
+    "scan": "scan_11_19h26m11.csv",
+    "points": 318,
+    "part_vide": 0.0252,
+    "vide_par_distance": [
+     0,
+     0,
+     7,
+     1,
+     0
+    ]
+   },
+   {
+    "scan": "scan_12_19h26m14.csv",
+    "points": 317,
+    "part_vide": 0.0189,
+    "vide_par_distance": [
+     0,
+     0,
+     5,
+     1,
+     0
+    ]
+   },
+   {
+    "scan": "scan_13_19h26m17.csv",
+    "points": 317,
+    "part_vide": 0.0536,
+    "vide_par_distance": [
+     0,
+     0,
+     17,
+     0,
+     0
+    ]
+   },
+   {
+    "scan": "scan_14_19h26m23.csv",
+    "points": 318,
+    "part_vide": 0.0566,
+    "vide_par_distance": [
+     0,
+     0,
+     18,
+     0,
+     0
+    ]
+   },
+   {
+    "scan": "scan_15_19h26m26.csv",
+    "points": 319,
+    "part_vide": 0.0564,
+    "vide_par_distance": [
+     0,
+     0,
+     18,
+     0,
+     0
+    ]
+   },
+   {
+    "scan": "scan_16_19h26m29.csv",
+    "points": 317,
+    "part_vide": 0.0599,
+    "vide_par_distance": [
+     0,
+     0,
+     19,
+     0,
+     0
+    ]
+   },
+   {
+    "scan": "scan_17_19h26m39.csv",
+    "points": 318,
+    "part_vide": 0.0472,
+    "vide_par_distance": [
+     0,
+     0,
+     13,
+     2,
+     0
+    ]
+   },
+   {
+    "scan": "scan_18_19h26m57.csv",
+    "points": 319,
+    "part_vide": 0.0345,
+    "vide_par_distance": [
+     0,
+     1,
+     10,
+     0,
+     0
+    ]
+   },
+   {
+    "scan": "scan_19_19h27m13.csv",
+    "points": 318,
+    "part_vide": 0.0723,
+    "vide_par_distance": [
+     0,
+     20,
+     3,
+     0,
+     0
+    ]
+   },
+   {
+    "scan": "scan_20_19h27m40.csv",
+    "points": 318,
+    "part_vide": 0.0629,
+    "vide_par_distance": [
+     0,
+     0,
+     13,
+     7,
+     0
+    ]
+   },
+   {
+    "scan": "scan_21_19h28m03.csv",
+    "points": 317,
+    "part_vide": 0.0978,
+    "vide_par_distance": [
+     0,
+     23,
+     7,
+     1,
+     0
+    ]
+   },
+   {
+    "scan": "scan_22_19h28m07.csv",
+    "points": 316,
+    "part_vide": 0.1013,
+    "vide_par_distance": [
+     0,
+     20,
+     9,
+     2,
+     1
+    ]
+   },
+   {
+    "scan": "scan_23_19h28m11.csv",
+    "points": 316,
+    "part_vide": 0.1013,
+    "vide_par_distance": [
+     0,
+     20,
+     9,
+     3,
+     0
+    ]
+   },
+   {
+    "scan": "scan_24_19h28m15.csv",
+    "points": 316,
+    "part_vide": 0.0443,
+    "vide_par_distance": [
+     0,
+     2,
+     9,
+     2,
+     1
+    ]
+   },
+   {
+    "scan": "scan_25_19h28m18.csv",
+    "points": 316,
+    "part_vide": 0.0696,
+    "vide_par_distance": [
+     1,
+     9,
+     10,
+     2,
+     0
+    ]
+   },
+   {
+    "scan": "scan_26_19h28m46.csv",
+    "points": 317,
+    "part_vide": 0.0852,
+    "vide_par_distance": [
+     0,
+     20,
+     5,
+     2,
+     0
+    ]
+   },
+   {
+    "scan": "scan_28_19h30m00.csv",
+    "points": 316,
+    "part_vide": 0.3956,
+    "vide_par_distance": [
+     0,
+     62,
+     29,
+     32,
+     2
+    ]
+   },
+   {
+    "scan": "scan_33_19h31m56.csv",
+    "points": 313,
+    "part_vide": 0.0319,
+    "vide_par_distance": [
+     0,
+     0,
+     6,
+     4,
+     0
+    ]
+   },
+   {
+    "scan": "scan_34_19h32m16.csv",
+    "points": 315,
+    "part_vide": 0.0413,
+    "vide_par_distance": [
+     0,
+     0,
+     8,
+     5,
+     0
+    ]
+   },
+   {
+    "scan": "scan_35_19h32m34.csv",
+    "points": 316,
+    "part_vide": 0.1076,
+    "vide_par_distance": [
+     1,
+     23,
+     6,
+     4,
+     0
+    ]
+   },
+   {
+    "scan": "scan_36_19h32m52.csv",
+    "points": 316,
+    "part_vide": 0.1171,
+    "vide_par_distance": [
+     0,
+     5,
+     22,
+     10,
+     0
+    ]
+   },
+   {
+    "scan": "scan_37_19h33m40.csv",
+    "points": 316,
+    "part_vide": 0.0475,
+    "vide_par_distance": [
+     0,
+     4,
+     8,
+     3,
+     0
+    ]
+   },
+   {
+    "scan": "scan_38_19h33m54.csv",
+    "points": 317,
+    "part_vide": 0.142,
+    "vide_par_distance": [
+     0,
+     6,
+     33,
+     3,
+     3
+    ]
+   },
+   {
+    "scan": "scan_39_19h34m10.csv",
+    "points": 316,
+    "part_vide": 0.212,
+    "vide_par_distance": [
+     0,
+     14,
+     42,
+     6,
+     5
+    ]
+   },
+   {
+    "scan": "scan_40_19h35m03.csv",
+    "points": 317,
+    "part_vide": 0.2429,
+    "vide_par_distance": [
+     0,
+     16,
+     47,
+     12,
+     2
+    ]
+   }
+  ]
+ },
+ "10/11": {
+  "scans": 48,
+  "mediane": 0.2259,
+  "p90": 0.3604,
+  "max": 0.3753,
+  "au_dessus_14_2": 40,
+  "points_vides_par_distance": {
+   "0-0.3 m": 331,
+   "0.3-1 m": 927,
+   "1-3 m": 1940,
+   "3-6 m": 922,
+   "6-13 m": 208
+  },
+  "rows": [
+   {
+    "scan": "scan_01_13h31m26.csv",
+    "points": 394,
+    "part_vide": 0.3604,
+    "vide_par_distance": [
+     2,
+     82,
+     36,
+     12,
+     10
+    ]
+   },
+   {
+    "scan": "scan_02_13h31m33.csv",
+    "points": 394,
+    "part_vide": 0.3655,
+    "vide_par_distance": [
+     2,
+     83,
+     36,
+     14,
+     9
+    ]
+   },
+   {
+    "scan": "scan_03_13h31m37.csv",
+    "points": 394,
+    "part_vide": 0.3604,
+    "vide_par_distance": [
+     3,
+     83,
+     33,
+     13,
+     10
+    ]
+   },
+   {
+    "scan": "scan_04_13h34m27.csv",
+    "points": 395,
+    "part_vide": 0.2759,
+    "vide_par_distance": [
+     1,
+     27,
+     25,
+     51,
+     5
+    ]
+   },
+   {
+    "scan": "scan_05_13h34m32.csv",
+    "points": 395,
+    "part_vide": 0.2709,
+    "vide_par_distance": [
+     0,
+     25,
+     29,
+     49,
+     4
+    ]
+   },
+   {
+    "scan": "scan_06_13h34m36.csv",
+    "points": 395,
+    "part_vide": 0.2608,
+    "vide_par_distance": [
+     1,
+     27,
+     24,
+     49,
+     2
+    ]
+   },
+   {
+    "scan": "scan_07_13h35m01.csv",
+    "points": 391,
+    "part_vide": 0.2251,
+    "vide_par_distance": [
+     7,
+     29,
+     31,
+     9,
+     12
+    ]
+   },
+   {
+    "scan": "scan_08_13h36m01.csv",
+    "points": 395,
+    "part_vide": 0.238,
+    "vide_par_distance": [
+     15,
+     41,
+     26,
+     6,
+     6
+    ]
+   },
+   {
+    "scan": "scan_09_13h36m20.csv",
+    "points": 397,
+    "part_vide": 0.2544,
+    "vide_par_distance": [
+     15,
+     44,
+     30,
+     7,
+     5
+    ]
+   },
+   {
+    "scan": "scan_10_13h37m35.csv",
+    "points": 395,
+    "part_vide": 0.2329,
+    "vide_par_distance": [
+     8,
+     20,
+     55,
+     4,
+     5
+    ]
+   },
+   {
+    "scan": "scan_11_13h38m04.csv",
+    "points": 395,
+    "part_vide": 0.2608,
+    "vide_par_distance": [
+     20,
+     6,
+     52,
+     20,
+     5
+    ]
+   },
+   {
+    "scan": "scan_12_13h38m38.csv",
+    "points": 395,
+    "part_vide": 0.1949,
+    "vide_par_distance": [
+     13,
+     9,
+     29,
+     20,
+     6
+    ]
+   },
+   {
+    "scan": "scan_13_13h39m09.csv",
+    "points": 393,
+    "part_vide": 0.1807,
+    "vide_par_distance": [
+     15,
+     0,
+     29,
+     27,
+     0
+    ]
+   },
+   {
+    "scan": "scan_14_13h39m44.csv",
+    "points": 392,
+    "part_vide": 0.1709,
+    "vide_par_distance": [
+     5,
+     1,
+     23,
+     37,
+     1
+    ]
+   },
+   {
+    "scan": "scan_15_13h40m07.csv",
+    "points": 396,
+    "part_vide": 0.1995,
+    "vide_par_distance": [
+     5,
+     1,
+     37,
+     35,
+     1
+    ]
+   },
+   {
+    "scan": "scan_16_13h40m35.csv",
+    "points": 396,
+    "part_vide": 0.2197,
+    "vide_par_distance": [
+     10,
+     20,
+     28,
+     28,
+     1
+    ]
+   },
+   {
+    "scan": "scan_17_13h40m55.csv",
+    "points": 397,
+    "part_vide": 0.2443,
+    "vide_par_distance": [
+     16,
+     4,
+     52,
+     24,
+     1
+    ]
+   },
+   {
+    "scan": "scan_18_13h41m51.csv",
+    "points": 395,
+    "part_vide": 0.3291,
+    "vide_par_distance": [
+     18,
+     25,
+     64,
+     20,
+     3
+    ]
+   },
+   {
+    "scan": "scan_19_13h42m19.csv",
+    "points": 395,
+    "part_vide": 0.2658,
+    "vide_par_distance": [
+     20,
+     10,
+     54,
+     12,
+     9
+    ]
+   },
+   {
+    "scan": "scan_20_13h42m48.csv",
+    "points": 394,
+    "part_vide": 0.2716,
+    "vide_par_distance": [
+     2,
+     18,
+     72,
+     7,
+     8
+    ]
+   },
+   {
+    "scan": "scan_21_13h43m13.csv",
+    "points": 395,
+    "part_vide": 0.2253,
+    "vide_par_distance": [
+     0,
+     23,
+     33,
+     24,
+     9
+    ]
+   },
+   {
+    "scan": "scan_22_13h43m40.csv",
+    "points": 394,
+    "part_vide": 0.2259,
+    "vide_par_distance": [
+     0,
+     50,
+     15,
+     17,
+     7
+    ]
+   },
+   {
+    "scan": "scan_23_13h44m20.csv",
+    "points": 395,
+    "part_vide": 0.2203,
+    "vide_par_distance": [
+     23,
+     0,
+     46,
+     16,
+     2
+    ]
+   },
+   {
+    "scan": "scan_24_13h44m40.csv",
+    "points": 394,
+    "part_vide": 0.1624,
+    "vide_par_distance": [
+     12,
+     0,
+     32,
+     19,
+     1
+    ]
+   },
+   {
+    "scan": "scan_25_13h45m45.csv",
+    "points": 396,
+    "part_vide": 0.351,
+    "vide_par_distance": [
+     2,
+     80,
+     47,
+     9,
+     1
+    ]
+   },
+   {
+    "scan": "scan_26_13h46m06.csv",
+    "points": 396,
+    "part_vide": 0.1894,
+    "vide_par_distance": [
+     0,
+     26,
+     38,
+     5,
+     6
+    ]
+   },
+   {
+    "scan": "scan_27_13h46m30.csv",
+    "points": 396,
+    "part_vide": 0.1818,
+    "vide_par_distance": [
+     0,
+     29,
+     36,
+     6,
+     1
+    ]
+   },
+   {
+    "scan": "scan_28_13h46m56.csv",
+    "points": 395,
+    "part_vide": 0.1747,
+    "vide_par_distance": [
+     0,
+     6,
+     44,
+     18,
+     1
+    ]
+   },
+   {
+    "scan": "scan_29_13h47m35.csv",
+    "points": 390,
+    "part_vide": 0.1513,
+    "vide_par_distance": [
+     3,
+     4,
+     33,
+     18,
+     1
+    ]
+   },
+   {
+    "scan": "scan_30_13h47m57.csv",
+    "points": 680,
+    "part_vide": 0.1426,
+    "vide_par_distance": [
+     1,
+     6,
+     45,
+     43,
+     2
+    ]
+   },
+   {
+    "scan": "scan_31_13h48m27.csv",
+    "points": 390,
+    "part_vide": 0.1282,
+    "vide_par_distance": [
+     0,
+     0,
+     32,
+     14,
+     4
+    ]
+   },
+   {
+    "scan": "scan_32_13h48m47.csv",
+    "points": 393,
+    "part_vide": 0.1425,
+    "vide_par_distance": [
+     0,
+     2,
+     41,
+     13,
+     0
+    ]
+   },
+   {
+    "scan": "scan_33_13h49m15.csv",
+    "points": 396,
+    "part_vide": 0.1086,
+    "vide_par_distance": [
+     0,
+     3,
+     25,
+     13,
+     2
+    ]
+   },
+   {
+    "scan": "scan_34_13h49m45.csv",
+    "points": 395,
+    "part_vide": 0.0911,
+    "vide_par_distance": [
+     0,
+     18,
+     14,
+     4,
+     0
+    ]
+   },
+   {
+    "scan": "scan_35_13h50m06.csv",
+    "points": 398,
+    "part_vide": 0.1307,
+    "vide_par_distance": [
+     0,
+     26,
+     23,
+     1,
+     2
+    ]
+   },
+   {
+    "scan": "scan_36_13h50m43.csv",
+    "points": 394,
+    "part_vide": 0.297,
+    "vide_par_distance": [
+     5,
+     12,
+     77,
+     22,
+     1
+    ]
+   },
+   {
+    "scan": "scan_37_13h51m14.csv",
+    "points": 398,
+    "part_vide": 0.2889,
+    "vide_par_distance": [
+     6,
+     5,
+     84,
+     20,
+     0
+    ]
+   },
+   {
+    "scan": "scan_38_13h51m37.csv",
+    "points": 395,
+    "part_vide": 0.3114,
+    "vide_par_distance": [
+     9,
+     3,
+     99,
+     12,
+     0
+    ]
+   },
+   {
+    "scan": "scan_39_13h52m03.csv",
+    "points": 396,
+    "part_vide": 0.3056,
+    "vide_par_distance": [
+     6,
+     7,
+     91,
+     15,
+     2
+    ]
+   },
+   {
+    "scan": "scan_40_13h52m29.csv",
+    "points": 393,
+    "part_vide": 0.3003,
+    "vide_par_distance": [
+     7,
+     36,
+     61,
+     14,
+     0
+    ]
+   },
+   {
+    "scan": "scan_41_13h53m03.csv",
+    "points": 393,
+    "part_vide": 0.1221,
+    "vide_par_distance": [
+     25,
+     2,
+     2,
+     12,
+     7
+    ]
+   },
+   {
+    "scan": "scan_42_13h54m09.csv",
+    "points": 390,
+    "part_vide": 0.1,
+    "vide_par_distance": [
+     11,
+     0,
+     12,
+     9,
+     7
+    ]
+   },
+   {
+    "scan": "scan_43_13h54m44.csv",
+    "points": 395,
+    "part_vide": 0.081,
+    "vide_par_distance": [
+     8,
+     9,
+     1,
+     8,
+     6
+    ]
+   },
+   {
+    "scan": "scan_44_13h56m02.csv",
+    "points": 384,
+    "part_vide": 0.1432,
+    "vide_par_distance": [
+     17,
+     14,
+     6,
+     14,
+     4
+    ]
+   },
+   {
+    "scan": "scan_45_13h56m29.csv",
+    "points": 387,
+    "part_vide": 0.137,
+    "vide_par_distance": [
+     12,
+     10,
+     4,
+     14,
+     13
+    ]
+   },
+   {
+    "scan": "scan_47_13h58m04.csv",
+    "points": 395,
+    "part_vide": 0.3747,
+    "vide_par_distance": [
+     0,
+     0,
+     105,
+     31,
+     12
+    ]
+   },
+   {
+    "scan": "scan_48_13h59m11.csv",
+    "points": 364,
+    "part_vide": 0.2418,
+    "vide_par_distance": [
+     6,
+     1,
+     43,
+     32,
+     6
+    ]
+   },
+   {
+    "scan": "scan_49_14h01m18.csv",
+    "points": 397,
+    "part_vide": 0.3753,
+    "vide_par_distance": [
+     0,
+     0,
+     86,
+     55,
+     8
+    ]
+   }
+  ]
+ }
+}
