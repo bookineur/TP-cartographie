@@ -1,6 +1,6 @@
 # Exploration testée avec les scans réels du 10/11 — résultats
 
-Protocole : `PROTOCOLE.md`, écrit et committé avant la mesure (commit e0b19f2). Code testé :
+Protocole : `PROTOCOLE.md`, écrit et committé avant la mesure (commit c9b0b5d). Code testé :
 `codex_lidar/serveur_robot/exploration.js` au commit ec480ba, réglages par défaut.
 
 ## Partie A — décisions rejouées sur les 48 scans réels
