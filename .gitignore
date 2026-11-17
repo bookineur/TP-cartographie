@@ -11,3 +11,7 @@ data/.derniere_session
 
 # Identifiants Wi-Fi personnels du robot (ne jamais les committer)
 arduino/**/wifi_secrets.h
+
+
+# Archives produites pour le rendu (copies des dépôts, pas des sources)
+rendu/archives/
