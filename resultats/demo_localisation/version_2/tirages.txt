@@ -1,0 +1,14 @@
+Trouvé en 0.9 s · recouvrement 72 %
+Position du robot : x = -0.410 m · y = 2.365 m · θ = 166.0°
+Pose enregistrée (Auto-SLAM) : x = -0.410 m · y = 2.340 m · θ = 166.0°
+Écart : 2.5 cm et 0.0° (l'Auto-SLAM n'est pas une vérité terrain)
+----
+Trouvé en 4.3 s · recouvrement 71 %
+Position du robot : x = -0.760 m · y = -1.085 m · θ = 168.0°
+Pose enregistrée (Auto-SLAM) : x = -0.760 m · y = -1.085 m · θ = 168.0°
+Écart : 0.0 cm et 0.0° (l'Auto-SLAM n'est pas une vérité terrain)
+----
+Trouvé en 3.9 s · recouvrement 80 %
+Position du robot : x = -9.810 m · y = 6.540 m · θ = 171.5°
+Pose enregistrée (Auto-SLAM) : x = -9.810 m · y = 6.565 m · θ = 171.5°
+Écart : 2.5 cm et 0.0° (l'Auto-SLAM n'est pas une vérité terrain)
