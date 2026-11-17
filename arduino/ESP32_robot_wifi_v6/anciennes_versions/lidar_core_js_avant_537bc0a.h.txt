@@ -1,4 +1,4 @@
-// Généré par genere_lidar_core_h.js à partir de lidar_lab/lidar_core.js
+// Généré par genere_lidar_core_h.js à partir de lidar_core.js (Lidar Lab)
 // Ne pas modifier à la main : relancer « node genere_lidar_core_h.js » après une modification de lidar_core.js.
 #pragma once
 const char LIDAR_CORE_JS[] PROGMEM = R"LCJS(/* Lidar Lab V1 — fonctions de calcul sans DOM, extraites de index.html pour être testées sous Node.

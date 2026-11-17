@@ -2,7 +2,8 @@
 // Outils communs : lecture de la séance réelle du 10/11 avec les fonctions de Lidar Lab (lidar_core.js).
 const fs = require("fs");
 const path = require("path");
-const CODEX = process.env.CODEX_LIDAR || "lidar_lab";
+// dépôt Lidar Lab : variable LIDAR_LAB, sinon dossier lidar_lab placé à côté de ce dépôt
+const CODEX = process.env.LIDAR_LAB || path.join(__dirname, "..", "..", "..", "lidar_lab");
 const LC = require(path.join(CODEX, "lidar_core.js"));
 const E = require(path.join(CODEX, "serveur_robot", "exploration.js"));
 const DATA = path.join(__dirname, "..", "..", "data", "mesures_phase19_2026-11-09");

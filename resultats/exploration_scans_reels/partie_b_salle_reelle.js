@@ -3,7 +3,8 @@
 const fs = require("fs");
 const path = require("path");
 const C = require("./commun.js");
-const CODEX = process.env.CODEX_LIDAR || "lidar_lab";
+// dépôt Lidar Lab : variable LIDAR_LAB, sinon dossier lidar_lab placé à côté de ce dépôt
+const CODEX = process.env.LIDAR_LAB || path.join(__dirname, "..", "..", "..", "lidar_lab");
 const S = require(path.join(CODEX, "tests", "synthetic_ld06.js"));
 const { createSimRobot } = require(path.join(CODEX, "tests", "simulateur_robot.js"));
 const { E } = C;

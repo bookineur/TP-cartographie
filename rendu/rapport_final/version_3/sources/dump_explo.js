@@ -1,4 +1,5 @@
-const R = "lidar_lab/";
+// dépôt Lidar Lab : variable LIDAR_LAB, sinon dossier lidar_lab placé à côté de ce dépôt
+const R = (process.env.LIDAR_LAB || require("path").join(__dirname, "..", "..", "..", "..", "..", "lidar_lab")) + "/";
 const S = require(R + "tests/synthetic_ld06.js");
 const { createSimRobot } = require(R + "tests/simulateur_robot.js");
 const E = require(R + "serveur_robot/exploration.js");
