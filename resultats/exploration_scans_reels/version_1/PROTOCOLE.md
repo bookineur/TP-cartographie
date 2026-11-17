@@ -2,7 +2,7 @@
 
 But : tester l'exploration automatique (bonus) avec les **vrais scans** de la séance du 10/11 (48 scans
 recalés, `data/mesures_phase19_2026-11-09/capture/seance_2026-11-09_13h06m10`, non modifiés), avant
-l'essai sur le robot. Code testé : `codex_lidar/serveur_robot/exploration.js` (commit 91dd476), réglages
+l'essai sur le robot. Code testé : `codex_lidar/serveur_robot/exploration.js` (commit ec480ba), réglages
 par défaut (`DEFAULTS`) sauf mention contraire.
 
 ## Partie A — Rejeu des décisions sur les scans réels
