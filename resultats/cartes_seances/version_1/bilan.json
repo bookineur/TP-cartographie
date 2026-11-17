@@ -1,0 +1,38 @@
+[
+ {
+  "seance": "Salle, 02/11 (lidar tenu à la main, 9 scans)",
+  "scans": 9,
+  "segments": 82,
+  "longueur_murs_m": 79.8,
+  "cellules_occupees": 888,
+  "cellules_libres": 33123,
+  "duree_s": 0.8
+ },
+ {
+  "seance": "Salle, 03/11 (relevés combinés)",
+  "scans": 39,
+  "segments": 359,
+  "longueur_murs_m": 236.1,
+  "cellules_occupees": 1527,
+  "cellules_libres": 50634,
+  "duree_s": 16.0
+ },
+ {
+  "seance": "Robot Wi-Fi, 04/11 (Auto-SLAM de Lidar Lab)",
+  "scans": 35,
+  "segments": 81,
+  "longueur_murs_m": 59.5,
+  "cellules_occupees": 1205,
+  "cellules_libres": 20123,
+  "duree_s": 1.0
+ },
+ {
+  "seance": "Robot Wi-Fi, 10/11 (Auto-SLAM de Lidar Lab)",
+  "scans": 48,
+  "segments": 166,
+  "longueur_murs_m": 119.7,
+  "cellules_occupees": 1890,
+  "cellules_libres": 42940,
+  "duree_s": 3.6
+ }
+]
