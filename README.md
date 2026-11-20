@@ -1,5 +1,15 @@
 # carto — cartographie et localisation 2D avec un lidar LD06
 
+## Rendu du TP
+
+> **Rapport final : [RENDU_FINAL/rapport_final_TP_cartographie.pdf](RENDU_FINAL/rapport_final_TP_cartographie.pdf)**
+>
+> Vidéos : [localisation d'un scan](RENDU_FINAL/video/demo_localisation_scan.mp4) ·
+> [exploration automatique (bonus)](RENDU_FINAL/video/exploration_automatique_demo.mp4) ·
+> Outil 2 : [Lidar Lab](https://github.com/bookineur/lidar-lab) ·
+> Robot : [ESP32_robot_wifi_v5](arduino/ESP32_robot_wifi_v5) ·
+> Tout le rendu : [dossier RENDU_FINAL](RENDU_FINAL)
+
 Bibliothèque Python et interface **Lidar Plot** pour transformer les scans d'un lidar LD06 en cartes
 (grid map et carte vectorielle) et pour localiser un robot par **scan matching**, avec un banc
 d'évaluation chiffrée. Projet réalisé dans le cadre du module « Cartographie et localisation appliquée
@@ -10,16 +20,6 @@ SLAM en direct, exploration automatique), est dans un dépôt séparé ([bookine
 mêmes formats de fichiers.
 
 ![Grid map et carte vectorielle de la salle (séance du robot du 10/11, 48 scans)](resultats/cartes_seances/version_1/carte_10_11.png)
-
-## Rendu du TP
-
-> **Rapport final : [RENDU_FINAL/rapport_final_TP_cartographie.pdf](RENDU_FINAL/rapport_final_TP_cartographie.pdf)**
->
-> Vidéos : [localisation d'un scan](RENDU_FINAL/video/demo_localisation_scan.mp4) ·
-> [exploration automatique (bonus)](RENDU_FINAL/video/exploration_automatique_demo.mp4) ·
-> Outil 2 : [Lidar Lab](https://github.com/bookineur/lidar-lab) ·
-> Robot : [ESP32_robot_wifi_v5](arduino/ESP32_robot_wifi_v5) ·
-> Tout le rendu : [dossier RENDU_FINAL](RENDU_FINAL)
 
 ## Fonctionnalités
 
