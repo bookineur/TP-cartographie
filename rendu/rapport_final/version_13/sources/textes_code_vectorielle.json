@@ -1,0 +1,89 @@
+{
+ "ancre": "La carte vectorielle est construite scan après scan",
+ "titre": "L'algorithme et le code de la carte vectorielle",
+ "methode_gras": "Les outils utilisés. ",
+ "methode": "Le code est réparti en deux fichiers : carto/segments.py contient les opérations sur les segments (extraction, proximité, fusion, intersection, découpe) et carto/vectormap.py la carte elle-même, la classe VectorMap, mise à jour par add_scan (carte + scan + pose → carte mise à jour). Chaque segment garde n_obs, le nombre d'observations qu'il a fusionnées ; la carte affichée ne garde que les segments vus au moins deux fois.",
+ "algo_gras": "L'algorithme, pour un scan et sa pose :",
+ "algo": [
+  "points <- R(θ)·points du scan + (x, y)                (repère de la carte)",
+  "groupes <- coupure là où deux points voisins sont à plus de 20 cm",
+  "pour chaque groupe :                                   split-and-merge",
+  "    split : couper au point le plus loin de la corde tant qu'il est à plus de 10 cm",
+  "    merge : réunir deux morceaux voisins si une même droite reste à moins de 10 cm",
+  "    droite des moindres carrés totaux ; rejet si moins de 6 points ou de 15 cm",
+  "(option) chaque rayon du lidar qui traverse un ancien segment le découpe",
+  "pour chaque nouveau segment :",
+  "    si proche d'un segment de la carte (≤ 8°, ≤ 8 cm, trou ≤ 20 cm) : fusion",
+  "                                          (les n_obs s'additionnent)",
+  "    sinon : ajout à la carte",
+  "consolidation : refusionner les segments devenus proches, supprimer ceux de moins de 15 cm"
+ ],
+ "codes": [
+  [
+   "Extrait 1 — découper un groupe de points en segments ",
+   "(split récursif, Douglas-Peucker). On mesure la distance de chaque point à la corde qui joint les deux extrémités ; si le point le plus loin dépasse le seuil, on coupe en deux et on recommence de chaque côté :",
+   [
+    "def _split(points: np.ndarray, i: int, j: int, thresh: float, out: list):",
+    "    if j - i < 2:",
+    "        out.append((i, j))",
+    "        return",
+    "    a, b = points[i], points[j]",
+    "    ab = b - a",
+    "    L = np.hypot(*ab)",
+    "    rel = points[i + 1:j] - a",
+    "    dist = np.abs(ab[0] * rel[:, 1] - ab[1] * rel[:, 0]) / L    # distance à la corde",
+    "    k = int(np.argmax(dist))",
+    "    if dist[k] > thresh:                                        # thresh = 10 cm",
+    "        k += i + 1",
+    "        _split(points, i, k, thresh, out)",
+    "        _split(points, k, j, thresh, out)",
+    "    else:",
+    "        out.append((i, j))"
+   ]
+  ],
+  [
+   "Extrait 2 — fusionner deux segments proches ",
+   "(merge). La direction est la moyenne des deux directions pondérée par les longueurs, la droite passe par le barycentre des milieux, et les extrémités sont les projections extrêmes des quatre extrémités :",
+   [
+    "def merge(s1: Segment, s2: Segment) -> Segment:",
+    "    L1, L2 = s1.length, s2.length",
+    "    d1, d2 = s1.direction, s2.direction",
+    "    if d1 @ d2 < 0:",
+    "        d2 = -d2",
+    "    d = L1 * d1 + L2 * d2",
+    "    d = d / np.hypot(*d) if np.hypot(*d) > 0 else d1",
+    "    w = L1 + L2",
+    "    c = (L1 * s1.midpoint + L2 * s2.midpoint) / w if w > 0 else s1.midpoint",
+    "    t = [(p - c) @ d for p in (s1.p1, s1.p2, s2.p1, s2.p2)]",
+    "    return Segment(c + min(t) * d, c + max(t) * d, s1.n_obs + s2.n_obs)"
+   ]
+  ],
+  [
+   "Extrait 3 — mettre à jour la carte avec un scan ",
+   "(VectorMap.add_scan et _integrate). Chaque nouveau segment absorbe tous les segments de la carte dont il est proche ; les autres restent tels quels :",
+   [
+    "def add_scan(self, scan: Scan, pose: Pose) -> list[Segment]:",
+    "    pts = scan.world_xy(pose)",
+    "    new = extract_segments(pts, **self.extract_kw)",
+    "    if self.ray_cutting and self.segments:",
+    "        self._cut_with_rays(pts, pose)",
+    "    for s in new:",
+    "        self._integrate(s)",
+    "    self._consolidate()",
+    "    self.n_scans += 1",
+    "    return new",
+    "",
+    "def _integrate(self, s: Segment):",
+    "    keep = []",
+    "    for m in self.segments:",
+    "        if are_close(m, s, self.angle_tol, self.dist_tol, self.gap_tol):",
+    "            s = merge(m, s)  # le segment de la carte impose son sens",
+    "        else:",
+    "            keep.append(m)",
+    "    keep.append(s)",
+    "    self.segments = keep"
+   ]
+  ]
+ ],
+ "fin": "Les extraits 2 et 3 sont recopiés tels quels ; dans l'extrait 1, seul le cas d'une corde de longueur nulle (deux points confondus) est retiré et deux commentaires sont ajoutés pour la lecture. Le seuil de 10 cm vaut environ trois fois la précision du LD06 (30 mm d'après sa fiche technique) : en simulation avec 30 mm de bruit, un seuil de 5 cm donnait 67 morceaux pour 11 murs réels, 10 cm en donne 11."
+}
