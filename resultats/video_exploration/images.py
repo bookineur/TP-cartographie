@@ -143,6 +143,28 @@ def carte_texte(nom, titre, lignes, sous=None):
     return nom
 
 
+def carte_code(nom, titre, sous, blocs):
+    """Carte avec du pseudo-code ou du code (police à chasse fixe) ; blocs = [(sous-titre, [lignes])]."""
+    fig = plt.figure(figsize=(19.2, 10.8), dpi=100); fig.patch.set_facecolor(FOND)
+    ax = fig.add_axes([0, 0, 1, 1]); ax.axis("off"); ax.set_xlim(0, 1); ax.set_ylim(0, 1)
+    ax.add_patch(FancyBboxPatch((0, 0.9), 1, 0.1, boxstyle="square,pad=0", fc="#1F4E79", ec="none"))
+    ax.text(0.5, 0.95, "Lidar Lab — exploration automatique (bonus)", color="white", fontsize=22, fontweight="bold", ha="center", va="center")
+    ax.text(0.05, 0.84, titre, color=TXT, fontsize=30, fontweight="bold", va="center")
+    ax.text(0.05, 0.79, sous, color=GRIS, fontsize=15, va="center")
+    y = 0.72
+    for st, lignes in blocs:
+        if st:
+            ax.text(0.05, y, st, color=JAUNE, fontsize=15, fontweight="bold", va="center"); y -= 0.04
+        h = 0.034 * len(lignes) + 0.02
+        ax.add_patch(FancyBboxPatch((0.05, y - h + 0.017), 0.9, h, boxstyle="round,pad=0.004,rounding_size=0.008", fc=PANNEAU, ec="#26364a", lw=1.2))
+        for l in lignes:
+            c = "#7f8ea0" if l.strip().startswith(("//", "#")) else TXT
+            ax.text(0.065, y, l, color=c, fontsize=14.5, family="DejaVu Sans Mono", va="center"); y -= 0.034
+        y -= 0.05
+    fig.savefig(IMG / nom, dpi=100, facecolor=FOND); plt.close(fig)
+    return nom
+
+
 montage = []
 montage.append((carte_texte("00_titre.png", "Le robot décide seul où aller",
                             ["1.  Il scanne et se recale sur la carte qu'il a déjà construite",
@@ -150,6 +172,36 @@ montage.append((carte_texte("00_titre.png", "Le robot décide seul où aller",
                              "3.  Il calcule un chemin sûr et avance d'un petit pas",
                              "4.  Il recommence, jusqu'à ce que toute la salle soit connue"],
                             "Exploration par frontières : scanner, choisir, avancer"), 7.0))
+montage.append((carte_code("01_algorithme.png", "L'algorithme : exploration par frontières",
+    "Méthode classique de la littérature (Yamauchi, 1997), construite sur les briques du cours : grid map (Jour 1) et recalage par scan matching (Jour 2)",
+    [(None, ["répéter",
+             "    scan  <- tour complet du lidar, robot à l'arrêt",
+             "    pose  <- recaler le scan sur la grid map            (scan matching, Jour 2)",
+             "    carte <- ajouter le scan à la grid map              (log-odds, Jour 1)",
+             "    frontières <- cellules libres qui touchent au moins 2 cellules inconnues",
+             "    si aucune frontière atteignable : fin de l'exploration",
+             "    chemin <- parcours en largeur sur la grille, murs gonflés de 25 cm,",
+             "              jusqu'à la frontière la plus proche",
+             "    direction <- vers le point du chemin situé à 1 m",
+             "              (bouchée ? direction libre la plus proche : contournement, demi-tour)",
+             "    tourner, vérifier à l'arrêt que (pas + 35 cm) sont libres, avancer d'un pas <= 35 cm"])]), 14.0))
+montage.append((carte_code("02_code.png", "Le code : serveur_robot/exploration.js",
+    "Extraits du code de Lidar Lab exécuté dans cette simulation (lignes de journal et d'attente omises, commentaires résumés)",
+    [("Une frontière : cellule libre au bord de l'inconnu", [
+        "const isFrontier = (row, col) => {",
+        "  if (at(row, col) !== 0) return false;   // la cellule doit être LIBRE",
+        "  let unk = 0;",
+        "  for (const [dr, dc] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) if (at(row + dr, col + dc) === -1) unk++;",
+        "  return unk >= 2;                         // au moins 2 voisines inconnues",
+        "};"]),
+     ("La boucle principale : choisir, tourner, avancer, se recaler", [
+        "const { pose, grid, visited } = io.state();",
+        "const sc = await io.scan();",
+        "const choice = chooseDirection(localPoints(sc, o), pose, grid, visited, o);",
+        "if (!choice) return (reason = \"terminé : plus de zone inconnue accessible\");",
+        "const ms = await move(() => io.turn(choice.turnDeg));",
+        "const mv = await stepForward(choice.step);    // contrôle de l'avant, robot à l'arrêt",
+        "const r = await io.capture();                 // nouveau scan + recalage (Auto-SLAM)"])]), 16.0))
 lent = LENT
 for i in range(N):
     if i < lent:

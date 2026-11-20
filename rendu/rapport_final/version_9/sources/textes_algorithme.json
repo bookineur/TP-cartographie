@@ -1,0 +1,42 @@
+{
+ "titre": "5.4 L'algorithme et le code",
+ "methode_gras": "La méthode. ",
+ "methode": "Le robot utilise l'exploration par frontières (Yamauchi, 1997), une méthode classique de la robotique mobile. Elle ne figure pas dans les supports du cours, mais elle est construite sur leurs briques : la grid map du Jour 1, qui distingue cellules libres, occupées et inconnues, et le recalage par scan matching du Jour 2, qui donne la position du robot après chaque pas. Une frontière est une cellule libre au bord de l'inconnu : aller vers la frontière la plus proche, c'est aller voir ce que le robot ne connaît pas encore.",
+ "algo_gras": "L'algorithme, à chaque pas :",
+ "algo": [
+  "répéter",
+  "    scan  <- tour complet du lidar, robot à l'arrêt",
+  "    pose  <- recaler le scan sur la grid map           (scan matching, Jour 2)",
+  "    carte <- ajouter le scan à la grid map             (log-odds, Jour 1)",
+  "    frontières <- cellules libres touchant au moins 2 cellules inconnues",
+  "    si aucune frontière atteignable : fin de l'exploration",
+  "    chemin <- parcours en largeur sur la grille, murs gonflés de 25 cm,",
+  "              jusqu'à la frontière la plus proche",
+  "    direction <- vers le point du chemin situé à 1 m",
+  "              (bouchée : direction libre la plus proche, contournement ou demi-tour)",
+  "    tourner ; vérifier à l'arrêt que (pas + 35 cm) sont libres ; avancer d'un pas <= 35 cm"
+ ],
+ "code1_gras": "Extrait 1 — reconnaître une frontière ",
+ "code1_txt": "(serveur_robot/exploration.js). Une cellule libre qui touche au moins deux cellules inconnues ; avec une seule, ce serait souvent un simple trou dû au bruit du lidar :",
+ "code1": [
+  "const isFrontier = (row, col) => {",
+  "  if (at(row, col) !== 0) return false;  // la cellule doit être libre",
+  "  let unk = 0;",
+  "  for (const [dr, dc] of [[1, 0], [-1, 0], [0, 1], [0, -1]])",
+  "    if (at(row + dr, col + dc) === -1) unk++;",
+  "  return unk >= 2;",
+  "};"
+ ],
+ "code2_gras": "Extrait 2 — la boucle principale ",
+ "code2_txt": "(même fichier, lignes de journal et d'attente omises, commentaires résumés) : choisir une direction, tourner, avancer d'un pas contrôlé, puis capturer et recaler le nouveau scan, exactement comme l'Auto-SLAM :",
+ "code2": [
+  "const { pose, grid, visited } = io.state();",
+  "const sc = await io.scan();",
+  "const choice = chooseDirection(localPoints(sc, o), pose, grid, visited, o);",
+  "if (!choice) return (reason = \"terminé : plus de zone inconnue accessible\");",
+  "const ms = await move(() => io.turn(choice.turnDeg));",
+  "const mv = await stepForward(choice.step);   // contrôle de l'avant, robot à l'arrêt",
+  "const r = await io.capture();                // nouveau scan + recalage"
+ ],
+ "fin": "Le chemin vers la frontière est calculé par un parcours en largeur (8 voisins) sur les cellules libres, en évitant les cellules à moins de 25 cm d'un mur : le robot ne frôle pas les obstacles. Le même code tourne dans le serveur de Lidar Lab avec le vrai robot et dans le simulateur utilisé pour la vidéo et les tests."
+}

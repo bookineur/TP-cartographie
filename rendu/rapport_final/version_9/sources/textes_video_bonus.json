@@ -1,0 +1,11 @@
+{
+ "intro_gras": "Vidéo de démonstration. ",
+ "intro": "La vidéo exploration_automatique_demo.mp4 (2 min 19) présente d'abord l'algorithme et le code (section 5.4), puis une exploration complète. Les six premiers scans sont expliqués au ralenti : scanner et se recaler, choisir la zone inconnue la plus proche, avancer d'un petit pas. La suite est accélérée. Résultat : 151 scans, 50 m parcourus, aucune collision, 87 % de la salle cartographiée, et un écart avec la vraie position de 13 cm au plus. La planche ci-dessous en reprend les étapes.",
+ "legende": "Figure 27 — Étapes de la vidéo de l'exploration automatique (images extraites de la vidéo).",
+ "lien_avant": "Vidéo : ",
+ "lien": "video/exploration_automatique_demo.mp4",
+ "lien_apres": " (fichier fourni avec ce rapport). Dans la version Word, elle est aussi intégrée ci-dessous : double-cliquer sur l'icône pour la lancer.",
+ "icone": "Lancer la vidéo du bonus",
+ "annexe_c1": "video/exploration_automatique_demo.mp4",
+ "annexe_c2": "Démo du bonus : le robot choisit seul où aller et cartographie la salle (simulation dans la salle réelle reconstruite)"
+}
