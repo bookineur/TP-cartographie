@@ -1,0 +1,68 @@
+{
+ "ancre": "Figure 9 ",
+ "titre": "L'algorithme et le code de la grid map",
+ "methode_gras": "Les deux outils demandés. ",
+ "methode": "Ce sont deux fonctions de carto/gridmap.py : OccupancyGrid.from_scan (outil 1 : scan + pose → nouvelle carte d'occupation) et update (outil 2 : carte existante + scan + pose → carte mise à jour, présentée au chapitre 1.2). Chaque cellule de 5 cm garde un log-odds l = log(p / (1 − p)) : 0 correspond à « inconnu » (p = 0,5), une valeur positive à « occupé », une valeur négative à « libre ».",
+ "algo_gras": "L'algorithme de mise à jour, pour un scan et sa pose :",
+ "algo": [
+  "pour chaque point du scan :",
+  "    point_carte <- R(θ)·point + (x, y)                 (pose du robot)",
+  "    rayon <- cellules traversées de la pose au point   (supercover : aucune cellule sautée)",
+  "    libres <- libres ∪ rayon ;  occupées <- occupées ∪ {cellule du point}",
+  "libres <- libres − occupées                            (l'impact l'emporte)",
+  "pour chaque cellule libre :   l <- l − 0,4             (une seule fois par scan)",
+  "pour chaque cellule occupée : l <- l + 0,85",
+  "l <- borné à [−4 ; 4]                                  (la carte reste capable de changer)",
+  "lecture : p = 1 − 1 / (1 + eˡ) ;  occupé si p ≥ 0,65 ;  libre si p ≤ 0,35 ;  sinon inconnu"
+ ],
+ "codes": [
+  [
+   "Extrait 1 — créer une carte à partir d'un scan ",
+   "(outil 1, from_scan). La grille est dimensionnée pour contenir le scan et le robot, avec une marge d'un mètre, puis remplie par la mise à jour :",
+   [
+    "@classmethod",
+    "def from_scan(cls, scan: Scan, pose: Pose, resolution=0.05, margin=1.0, **kw) -> \"OccupancyGrid\":",
+    "    pts = scan.world_xy(pose)",
+    "    allp = np.vstack([pts, [[pose.x, pose.y]]])",
+    "    lo = np.floor((allp.min(0) - margin) / resolution) * resolution",
+    "    hi = allp.max(0) + margin",
+    "    shape = tuple(np.ceil((hi - lo) / resolution).astype(int)[::-1] + 1)",
+    "    grid = cls(resolution, lo, shape, **kw)",
+    "    grid.update(scan, pose)",
+    "    return grid"
+   ]
+  ],
+  [
+   "Extrait 2 — les cellules traversées par un rayon ",
+   "(supercover, boucle principale). On avance de cellule en cellule en franchissant toujours la frontière la plus proche ; quand le rayon passe exactement par un coin, les deux cellules voisines sont aussi marquées :",
+   [
+    "while (i != i_end or j != j_end) and len(cells) <= 2 * n_max:",
+    "    if t_max_i < t_max_j - eps:          # la prochaine frontière franchie est verticale",
+    "        i += step_i; t_max_i += t_delta_i; cells.append((i, j))",
+    "    elif t_max_j < t_max_i - eps:        # elle est horizontale",
+    "        j += step_j; t_max_j += t_delta_j; cells.append((i, j))",
+    "    else:  # passage exactement par un coin : on marque aussi les deux voisines",
+    "        cells.append((i + step_i, j)); cells.append((i, j + step_j))",
+    "        i += step_i; j += step_j; t_max_i += t_delta_i; t_max_j += t_delta_j",
+    "        cells.append((i, j))"
+   ]
+  ],
+  [
+   "Extrait 3 — lire la carte ",
+   "(probability, classify). Les log-odds sont convertis en probabilités, puis en trois états :",
+   [
+    "def probability(self) -> np.ndarray:",
+    "    return 1.0 - 1.0 / (1.0 + np.exp(self.logodds))",
+    "",
+    "def classify(self, occ_thresh=0.65, free_thresh=0.35) -> np.ndarray:",
+    "    \"\"\"-1 inconnu, 0 libre, 1 occupé.\"\"\"",
+    "    p = self.probability()",
+    "    out = np.full(p.shape, -1, np.int8)",
+    "    out[p <= free_thresh] = 0",
+    "    out[p >= occ_thresh] = 1",
+    "    return out"
+   ]
+  ]
+ ],
+ "fin": "Les extraits 1 et 3 sont recopiés tels quels ; dans l'extrait 2, plusieurs instructions sont regroupées sur une ligne pour la lecture. Les valeurs +0,85 et −0,4 font qu'un impact pèse plus qu'un passage libre : un mur vu une seule fois apparaît, mais il faut plusieurs passages du laser pour l'effacer."
+}
