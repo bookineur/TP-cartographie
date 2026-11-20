@@ -1,0 +1,62 @@
+[
+ [
+  "Figure 11 —grid map",
+  "Figure 11 — Séance du 02/11 (9 scans) : grid map"
+ ],
+ [
+  "Figure 12 grid map",
+  "Figure 12 — Séance du 03/11, relevés combinés (39 scans) : grid map"
+ ],
+ [
+  "Figure 13 — Séance du robot: grid map",
+  "Figure 13 — Séance du robot du 04/11 (35 scans recalés par l'Auto-SLAM) : grid map"
+ ],
+ [
+  "Figure 14 — la salle complète",
+  "Figure 14 — Séance du robot du 10/11 (48 scans recalés) : la salle complète"
+ ],
+ [
+  "Figure 17 pose de",
+  "Figure 17 — Chaque scan du 10/11 localisé sans pose initiale (cercle : pose de"
+ ],
+ [
+  "Figure 18 à gauche",
+  "Figure 18 — Séance du 04/11 avant correction : à gauche"
+ ],
+ [
+  "Figure 20 — Carte vectorielle filtrage",
+  "Figure 20 — Carte vectorielle du 10/11 avant et après filtrage"
+ ],
+ [
+  "13 × 12 m",
+  "13 × 10 m"
+ ],
+ [
+  "le robot a parcouru la salle, piloté",
+  "Le 10/11, le robot a parcouru la salle, piloté"
+ ],
+ [
+  "erreur de rotation de ±5 %",
+  "Le robot simulé reproduit les défauts du vrai : erreur de rotation de ±5 %"
+ ],
+ [
+  "Méthode : scan trouvés par",
+  "Méthode : candidats trouvés par"
+ ],
+ [
+  "Le robot n'ayant pas d'odométrie :",
+  "Le robot n'a pas d'odométrie :"
+ ],
+ [
+  "partagé entre quatre personne,",
+  "partagé entre quatre groupes,"
+ ],
+ [
+  "dans Lidar Lab: les murs",
+  "dans Lidar Lab : les murs"
+ ],
+ [
+  "NB: Par souci",
+  "NB : par souci"
+ ]
+]
